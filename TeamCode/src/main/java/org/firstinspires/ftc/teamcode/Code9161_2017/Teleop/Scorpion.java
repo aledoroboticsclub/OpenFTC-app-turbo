@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017;
+package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -49,6 +49,8 @@ public class Scorpion {
 	Servo extender;
 
 	ColorSensor MRColor;
+	ColorSensor bob;
+	//pointless change
 
 
 

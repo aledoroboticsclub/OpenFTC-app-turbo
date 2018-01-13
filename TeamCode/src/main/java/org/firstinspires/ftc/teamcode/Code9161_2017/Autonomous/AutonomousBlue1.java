@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Code9161_2017.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.Code9161_2017.Scorpion;
+import org.firstinspires.ftc.teamcode.Code9161_2017.Teleop.Scorpion;
 
 @Autonomous(name="AutonomousBlue1", group="Linear OpMode")
 public class AutonomousBlue1 extends LinearOpMode {
@@ -11,7 +11,11 @@ public class AutonomousBlue1 extends LinearOpMode {
     int a =0;
     @Override
     public void runOpMode() {
+        r.initRobot(hardwareMap, telemetry);
+        AutoTransitioner.transitionOnStop(this, "TeleopScorpion");
+
         waitForStart();
+
         r.driveLeftEncoder(1,6);
         r.pushJewel("Blue");
         r.driveBackwardEncoder(1,12);

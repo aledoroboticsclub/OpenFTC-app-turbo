@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017;
+package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
