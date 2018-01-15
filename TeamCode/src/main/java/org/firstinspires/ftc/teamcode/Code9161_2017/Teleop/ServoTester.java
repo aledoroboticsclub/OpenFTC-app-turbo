@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -32,12 +33,12 @@ public class ServoTester extends OpMode
 	double trayPosition=.943;
 
 	Servo jewelPusher;
-	double jewelPosition=.19;
+	double jewelPosition=.32;
 
 	Servo relicServo;
 	double relicPosition=.69;
 
-	//ColorSensor MRColor;
+	ColorSensor MRColor;
 
 	DcMotor lift1;
 	DcMotor lift2;
@@ -56,8 +57,8 @@ public class ServoTester extends OpMode
         lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 		lift1.setPower(1);
 		lift2.setPower(1);
-		/*MRColor=hardwareMap.colorSensor.get("MR Color Sensor");
-		MRColor.enableLed(true);*/
+		MRColor= hardwareMap.colorSensor.get("Color");
+		MRColor.enableLed(true);
 	}
 
 	public void initLoop(){}
@@ -88,8 +89,8 @@ public class ServoTester extends OpMode
      	jewelPusher.setPosition(jewelPosition);
 		telemetry.addData("JewelPusher Servo Position", jewelPosition);
 
-		/*telemetry.addData("Red: ", MRColor.red());
-		telemetry.addData("Blue: ", MRColor.blue());*/
+		telemetry.addData("Red: ", MRColor.red());
+		telemetry.addData("Blue: ", MRColor.blue());
 
 		relicPosition+=gamepad1.dpad_down?.01:0;
 		relicPosition-=gamepad1.dpad_up?.01:0;

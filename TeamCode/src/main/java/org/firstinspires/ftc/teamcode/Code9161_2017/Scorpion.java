@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
+package org.firstinspires.ftc.teamcode.Code9161_2017;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
@@ -35,10 +35,10 @@ import java.util.List;
  */
 public class Scorpion {
 
-	DcMotor frontLeft;
-	DcMotor frontRight;
-	DcMotor backLeft;
-	DcMotor backRight;
+	public DcMotor frontLeft;
+	public DcMotor frontRight;
+	public DcMotor backLeft;
+	public DcMotor backRight;
 	DcMotor lift1;
 	DcMotor lift2;
 	DcMotor inputMR;
@@ -56,6 +56,11 @@ public class Scorpion {
 	public static final String TAG = "Vuforia VuMark";
 	OpenGLMatrix lastLocation = null;
 	VuforiaLocalizer vuforia;
+	int cameraMonitorViewId;
+	VuforiaLocalizer.Parameters parameters;
+	public VuforiaTrackables relicTrackables;
+	public VuforiaTrackable relicTemplate;
+	private static final int vuforiaTimeoutTime=10000;//in milliseconds
 
 	ElapsedTime timer = new ElapsedTime();
 
@@ -84,41 +89,16 @@ public class Scorpion {
 
 	public void initRobot(HardwareMap spareMap, Telemetry tempTelemetry) {
 		getOpmodeVariables(spareMap, tempTelemetry);
+		initVuforia();
+		initHardware();
 
-		frontLeft = hardwareMap.dcMotor.get("front left wheel");
-		frontRight = hardwareMap.dcMotor.get("front right wheel");
-		backLeft = hardwareMap.dcMotor.get("back left wheel");
-		backRight = hardwareMap.dcMotor.get("back right wheel");
-		frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-		backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-		setDriveMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-		setDriveMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-		lift1=hardwareMap.dcMotor.get("lift1");
-		lift2=hardwareMap.dcMotor.get("lift2");
-		lift2.setDirection(DcMotorSimple.Direction.REVERSE);
-		lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-		lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 		lift1.setPower(liftPower);
 		lift2.setPower(liftPower);
-
-		inputML=hardwareMap.dcMotor.get("inputML");
-		inputMR=hardwareMap.dcMotor.get("inputMR");
-		inputML.setDirection(DcMotorSimple.Direction.REVERSE);
-		inputML.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		inputMR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-		trayServo=hardwareMap.servo.get("trayServo");
-		relicGrabber=hardwareMap.servo.get("relicServo");
-		jewelPusher=hardwareMap.servo.get("jewelPusher");
-		extender=hardwareMap.servo.get("extender");
 
 		setTrayToIntake();
 		jewelPusher.setPosition(jewelPusherUpPosition);
 		setGrabberToGrabbed();
-		MRColor=hardwareMap.colorSensor.get("Color");
+
 		MRColor.enableLed(true);
 	}
 
@@ -127,6 +107,54 @@ public class Scorpion {
 		hardwareMap=spareMap;
 	}
 
+	public void initVuforia(){
+		cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+		parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+		parameters.vuforiaLicenseKey = "Ac8Q0nb/////AAAAGZRBQQCid0gNt3ydtz8W8gB8MrlkYn+Gu+jvldH+Igx9SypXvRwUWJw/71iF8xhpjKXBDv1UDD+EsjkvvC1+Zko/hF+lZG/TglT50MCsw6/q2MuSc+AUFDqT9lhEJcyroMMp20VPNwj/fUoUAxr5DV4+VUdwwYW/sCML6iL/x0rWEzUGxJf8qvKSrZcI/4X2fWsryCaprTXecsZCTudHQiElph2GCtMva4843D9sx+a6NB9zhPiyn6aaydEs5T4Ygc5o2nK1p6o8G82++XtlDYPkBuVBajLsO6z0Zvk980xIWmgyKjMNZlLofM7lLJdjt5Sh4a1imlIlsAWbQqPvs35MxJLmmrugrO7WXXveK4TY";
+
+		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+		this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+
+		relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+		relicTemplate = relicTrackables.get(0);
+		relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+	}
+	
+	public void initHardware(){
+		frontLeft = hardwareMap.dcMotor.get("front left wheel");
+		frontRight = hardwareMap.dcMotor.get("front right wheel");
+		backLeft = hardwareMap.dcMotor.get("back left wheel");
+		backRight = hardwareMap.dcMotor.get("back right wheel");
+		frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+		backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+		setDriveMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+		setDriveMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+		
+		lift1=hardwareMap.dcMotor.get("lift1");
+		lift2=hardwareMap.dcMotor.get("lift2");
+		lift2.setDirection(DcMotorSimple.Direction.REVERSE);
+		setLiftMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+		setLiftMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		setLiftMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+		inputML=hardwareMap.dcMotor.get("inputML");
+		inputMR=hardwareMap.dcMotor.get("inputMR");
+		inputML.setDirection(DcMotorSimple.Direction.REVERSE);
+		inputML.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		inputMR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		
+		trayServo=hardwareMap.servo.get("trayServo");
+		relicGrabber=hardwareMap.servo.get("relicServo");
+		jewelPusher=hardwareMap.servo.get("jewelPusher");
+		extender=hardwareMap.servo.get("extender");
+
+		MRColor=hardwareMap.colorSensor.get("Color");
+	}
+	
+	String format(OpenGLMatrix transformationMatrix) {
+		return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+	}
+	
 	public void rightIntake (double power) {
 		inputMR.setPower(power*.4);
 	}
@@ -360,8 +388,7 @@ public class Scorpion {
 	}
 
 	public void setDriveMotorMode(DcMotor.RunMode mode) {
-		switch(mode)
-		{
+		switch(mode) {
 			case RUN_USING_ENCODER:
 				if(frontLeft.getMode()==DcMotor.RunMode.RUN_USING_ENCODER)
 					break;
@@ -416,6 +443,45 @@ public class Scorpion {
 		backLeft.setPower(power);
 		backRight.setPower(power);
 	}//for use with driveEncoder methods
+	
+	public void setLiftMotorMode(DcMotor.RunMode mode){
+		switch(mode) {
+			case RUN_USING_ENCODER:
+				if(lift1.getMode()==DcMotor.RunMode.RUN_USING_ENCODER)
+					break;
+				lift1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+				lift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);break;
+			case RUN_WITHOUT_ENCODER:
+				if(lift1.getMode()==DcMotor.RunMode.RUN_WITHOUT_ENCODER)
+					break;
+				lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+				lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);break;
+			case STOP_AND_RESET_ENCODER:
+				if(lift1.getMode()==DcMotor.RunMode.STOP_AND_RESET_ENCODER)
+					break;
+				lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+				lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);break;
+			case RUN_TO_POSITION:
+				if(lift1.getMode()==DcMotor.RunMode.RUN_TO_POSITION)
+					break;
+				lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+				lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);break;
+		}
+	}
+	public void setLiftMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior behavior){
+		switch(behavior) {
+			case BRAKE:
+				if(lift1.getZeroPowerBehavior()==DcMotor.ZeroPowerBehavior.BRAKE)
+					break;
+				lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+				lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);;break;
+			case FLOAT:
+				if(lift1.getZeroPowerBehavior()==DcMotor.ZeroPowerBehavior.FLOAT)
+					break;
+				lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+				lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);break;
+		}
+	}
 	public void waiter(int time) {
 		timer.reset();
 		while(timer.milliseconds()<time){}
@@ -456,7 +522,6 @@ public class Scorpion {
 			}
 		}
 	}
-
 
 	//driveTime methods
 	//TODO: consider implementing acceleration and deceleration into the driveTime methods, even though it may be more work than it is worth
@@ -568,35 +633,21 @@ public class Scorpion {
 //		setToStill();
 //	}
 
-	public int decodePictograph() { //returns a distance value for the robot to travel
-		int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-		parameters.vuforiaLicenseKey = "Ac8Q0nb/////AAAAGZRBQQCid0gNt3ydtz8W8gB8MrlkYn+Gu+jvldH+Igx9SypXvRwUWJw/71iF8xhpjKXBDv1UDD+EsjkvvC1+Zko/hF+lZG/TglT50MCsw6/q2MuSc+AUFDqT9lhEJcyroMMp20VPNwj/fUoUAxr5DV4+VUdwwYW/sCML6iL/x0rWEzUGxJf8qvKSrZcI/4X2fWsryCaprTXecsZCTudHQiElph2GCtMva4843D9sx+a6NB9zhPiyn6aaydEs5T4Ygc5o2nK1p6o8G82++XtlDYPkBuVBajLsO6z0Zvk980xIWmgyKjMNZlLofM7lLJdjt5Sh4a1imlIlsAWbQqPvs35MxJLmmrugrO7WXXveK4TY";
-
-		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-		this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
-
-		VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-		//int i = 0;
-		while (true){
-			VuforiaTrackable relicTemplate = relicTrackables.get(0);
-			relicTemplate.setName("relicVuMark");
-			RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-			if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+	public RelicRecoveryVuMark waitUntilVuMarkIsFound() {
+		ElapsedTime check=new ElapsedTime();
+		RelicRecoveryVuMark vuMark=RelicRecoveryVuMark.from(relicTemplate);
+		while(vuMark==RelicRecoveryVuMark.UNKNOWN){
+			vuMark = RelicRecoveryVuMark.from(relicTemplate);
+			if (vuMark != RelicRecoveryVuMark.UNKNOWN){
 				telemetry.addData("VuMark", "%s visible", vuMark);
-				if (vuMark == RelicRecoveryVuMark.LEFT)
-					return 0;
-				if (vuMark == RelicRecoveryVuMark.CENTER)
-					return 6;
-				if (vuMark == RelicRecoveryVuMark.RIGHT)
-					return 12;
+				return vuMark;
 			}
-			else {
+			else
 				telemetry.addData("VuMark", "not visible");
-			}
+			if(check.milliseconds()>vuforiaTimeoutTime)
+				break;
 			telemetry.update();
-			//i++;
 		}
-		//return 0;
+		return RelicRecoveryVuMark.UNKNOWN;
 	}
 }

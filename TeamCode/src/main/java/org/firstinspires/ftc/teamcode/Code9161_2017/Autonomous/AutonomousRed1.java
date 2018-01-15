@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.Code9161_2017.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
-import org.firstinspires.ftc.teamcode.Code9161_2017.Teleop.Scorpion;
+import org.firstinspires.ftc.teamcode.Code9161_2017.Scorpion;
 
 @Autonomous(name="AutonomousRed1", group="Linear OpMode")
 public class AutonomousRed1 extends LinearOpMode {
@@ -20,7 +20,7 @@ public class AutonomousRed1 extends LinearOpMode {
         r.pushJewel("Red");
         r.driveBackwardEncoder(1,12);
         r.turnCounterwiseEncoder(1,12);
-        a = r.decodePictograph();
+      //  a = r.decodePictograph();
         r.driveBackwardEncoder(1,18 + a);
         r.turnCounterwiseEncoder(1,12);
         r.driveForwardEncoder(1,12);
