@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -49,11 +50,6 @@ public class Scorpion {
 	Servo extender;
 
 	ColorSensor MRColor;
-	ColorSensor bob;
-	//pointless change
-
-
-
 	Telemetry telemetry;
 	HardwareMap hardwareMap;
 
@@ -67,8 +63,8 @@ public class Scorpion {
 	private static final double parallelTrayPosistion=.673;
 	private static final double placementTrayPosition=0.06;
 
-	private static final double jewelPusherDownPosition=.81;
-	private static final double jewelPusherUpPosition=.19;
+	private static final double jewelPusherDownPosition=.92;
+	private static final double jewelPusherUpPosition=.32;
 
 	private static final double relicGrabberGrabbedPosition=.6;
 	private static final double relicGrabberReleasePosition=.45;
@@ -87,8 +83,7 @@ public class Scorpion {
 
 
 	public void initRobot(HardwareMap spareMap, Telemetry tempTelemetry) {
-		telemetry = tempTelemetry;
-		hardwareMap=spareMap;
+		getOpmodeVariables(spareMap, tempTelemetry);
 
 		frontLeft = hardwareMap.dcMotor.get("front left wheel");
 		frontRight = hardwareMap.dcMotor.get("front right wheel");
@@ -123,9 +118,13 @@ public class Scorpion {
 		setTrayToIntake();
 		jewelPusher.setPosition(jewelPusherUpPosition);
 		setGrabberToGrabbed();
+		MRColor=hardwareMap.colorSensor.get("Color");
+		MRColor.enableLed(true);
+	}
 
-		/*MRColor=hardwareMap.colorSensor.get("MR Color Sensor");
-		MRColor.enableLed(true);*/
+	public void getOpmodeVariables(HardwareMap spareMap, Telemetry tempTelemetry) {
+		telemetry = tempTelemetry;
+		hardwareMap=spareMap;
 	}
 
 	public void rightIntake (double power) {
@@ -212,10 +211,10 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-					frontLDist>encoderSafeZone &&
-					frontRDist>encoderSafeZone &&
-					backLDist>encoderSafeZone &&
-					backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
@@ -240,10 +239,10 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
@@ -268,10 +267,10 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
@@ -296,10 +295,10 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
@@ -324,10 +323,10 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
@@ -352,10 +351,10 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
@@ -457,6 +456,7 @@ public class Scorpion {
 			}
 		}
 	}
+
 
 	//driveTime methods
 	//TODO: consider implementing acceleration and deceleration into the driveTime methods, even though it may be more work than it is worth
@@ -567,7 +567,8 @@ public class Scorpion {
 //		}
 //		setToStill();
 //	}
-	public int decodePictograph(){ //returns a distance value for the robot to travel
+
+	public int decodePictograph() { //returns a distance value for the robot to travel
 		int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 		parameters.vuforiaLicenseKey = "Ac8Q0nb/////AAAAGZRBQQCid0gNt3ydtz8W8gB8MrlkYn+Gu+jvldH+Igx9SypXvRwUWJw/71iF8xhpjKXBDv1UDD+EsjkvvC1+Zko/hF+lZG/TglT50MCsw6/q2MuSc+AUFDqT9lhEJcyroMMp20VPNwj/fUoUAxr5DV4+VUdwwYW/sCML6iL/x0rWEzUGxJf8qvKSrZcI/4X2fWsryCaprTXecsZCTudHQiElph2GCtMva4843D9sx+a6NB9zhPiyn6aaydEs5T4Ygc5o2nK1p6o8G82++XtlDYPkBuVBajLsO6z0Zvk980xIWmgyKjMNZlLofM7lLJdjt5Sh4a1imlIlsAWbQqPvs35MxJLmmrugrO7WXXveK4TY";
@@ -576,22 +577,26 @@ public class Scorpion {
 		this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
 
 		VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-		VuforiaTrackable relicTemplate = relicTrackables.get(0);
-		relicTemplate.setName("relicVuMarkTemplate");
-		RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-		if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
-			telemetry.addData("VuMark", "%s visible", vuMark);
-			if(vuMark == RelicRecoveryVuMark.LEFT)
-				return 0;
-			if(vuMark == RelicRecoveryVuMark.CENTER)
-				return 6;
-			if(vuMark == RelicRecoveryVuMark.RIGHT)
-				return 12;
+		//int i = 0;
+		while (true){
+			VuforiaTrackable relicTemplate = relicTrackables.get(0);
+			relicTemplate.setName("relicVuMark");
+			RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
+			if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
+				telemetry.addData("VuMark", "%s visible", vuMark);
+				if (vuMark == RelicRecoveryVuMark.LEFT)
+					return 0;
+				if (vuMark == RelicRecoveryVuMark.CENTER)
+					return 6;
+				if (vuMark == RelicRecoveryVuMark.RIGHT)
+					return 12;
+			}
+			else {
+				telemetry.addData("VuMark", "not visible");
+			}
+			telemetry.update();
+			//i++;
 		}
-		else {
-			telemetry.addData("VuMark", "not visible");
-		}
-		telemetry.update();
-		return 0;
+		//return 0;
 	}
 }
