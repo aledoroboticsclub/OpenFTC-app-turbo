@@ -19,22 +19,17 @@ public class AutonomousBlue1 extends LinearOpMode {
         waitForStart();
 
         r.relicTrackables.activate();
-
-        /*r.driveLeftEncoder(1,6);
+        r.driveLeftEncoder(.25,7);
         r.pushJewel("Blue");
-        r.driveBackwardEncoder(1,12);
-        r.turnCounterwiseEncoder(1,12);*/
-        r.driveForwardEncoder(.5,12);
-
-        RelicRecoveryVuMark vuMark=r.waitUntilVuMarkIsFound();
-
-        telemetry.addData("Vumark: ",vuMark);
-        r.waiter(500);
-        if(vuMark!=RelicRecoveryVuMark.UNKNOWN)
-            r.driveBackwardEncoder(.5,12);
-        /*r.driveBackwardEncoder(1,18 );
-        r.turnClockwiseEncoder(1,12);
-        r.driveForwardEncoder(1,36);
-        r.setLiftToPosition0();*/
+        r.driveRightEncoder(.25,18);
+        r.driveForwardEncoder(.25,11);
+        r.turnClockwiseEncoder(.25,21);
+        int pictographDistance = r.waitUntilVuMarkIsFound();
+        r.driveLeftEncoder(.25,48);
+        r.driveBackwardEncoder(.5,pictographDistance);
+        r.turnClockwiseEncoder(.25,21);
+        r.setTrayToPlace();
+        r.driveBackwardEncoder(.25,3);
+        r.setTrayToIntake();
     }
 }

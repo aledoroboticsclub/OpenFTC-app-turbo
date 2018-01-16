@@ -10,6 +10,7 @@ import org.firstinspires.ftc.teamcode.Code9161_2017.Scorpion;
 import java.text.DecimalFormat;
 //all motor values are independantly determined by formulas found on internet for mecanum drive
 //is analog (joystick based), thus TeleopDriveStick is no longer needed
+//is now being used as drive system in TeleopScorpion
 //complete
 
 @TeleOp(name="TeleopDriveAdvanced", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
