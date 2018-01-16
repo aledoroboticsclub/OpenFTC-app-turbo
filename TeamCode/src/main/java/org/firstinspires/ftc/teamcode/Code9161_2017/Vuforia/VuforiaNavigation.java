@@ -21,12 +21,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Autonomous(name="Vuforia Navigation", group ="Concept")
+@Disabled
 public class VuforiaNavigation extends LinearOpMode {
 
     public static final String TAG = "Vuforia Navigation Sample";
-
     OpenGLMatrix lastLocation = null;
-
     VuforiaLocalizer vuforia;
 
     @Override public void runOpMode() {

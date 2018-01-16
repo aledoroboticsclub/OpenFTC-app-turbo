@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Code9161_2017;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -34,10 +35,10 @@ import java.util.List;
  */
 public class Scorpion {
 
-	DcMotor frontLeft;
-	DcMotor frontRight;
-	DcMotor backLeft;
-	DcMotor backRight;
+	public DcMotor frontLeft;
+	public DcMotor frontRight;
+	public DcMotor backLeft;
+	public DcMotor backRight;
 	DcMotor lift1;
 	DcMotor lift2;
 	DcMotor inputMR;
@@ -49,15 +50,17 @@ public class Scorpion {
 	Servo extender;
 
 	ColorSensor MRColor;
-
-
-
 	Telemetry telemetry;
 	HardwareMap hardwareMap;
 
 	public static final String TAG = "Vuforia VuMark";
 	OpenGLMatrix lastLocation = null;
 	VuforiaLocalizer vuforia;
+	int cameraMonitorViewId;
+	VuforiaLocalizer.Parameters parameters;
+	public VuforiaTrackables relicTrackables;
+	public VuforiaTrackable relicTemplate;
+	private static final int vuforiaTimeoutTime=10000;//in milliseconds
 
 	ElapsedTime timer = new ElapsedTime();
 
@@ -65,8 +68,8 @@ public class Scorpion {
 	private static final double parallelTrayPosistion=.673;
 	private static final double placementTrayPosition=0.06;
 
-	private static final double jewelPusherDownPosition=.81;
-	private static final double jewelPusherUpPosition=.19;
+	private static final double jewelPusherDownPosition=.92;
+	private static final double jewelPusherUpPosition=.39;
 
 	private static final double relicGrabberGrabbedPosition=.6;
 	private static final double relicGrabberReleasePosition=.45;
@@ -85,9 +88,39 @@ public class Scorpion {
 
 
 	public void initRobot(HardwareMap spareMap, Telemetry tempTelemetry) {
+		getOpmodeVariables(spareMap, tempTelemetry);
+		initVuforia();
+		initHardware();
+
+		lift1.setPower(liftPower);
+		lift2.setPower(liftPower);
+
+		setTrayToIntake();
+		jewelPusher.setPosition(jewelPusherUpPosition);
+		setGrabberToGrabbed();
+
+		MRColor.enableLed(true);
+	}
+
+	public void getOpmodeVariables(HardwareMap spareMap, Telemetry tempTelemetry) {
 		telemetry = tempTelemetry;
 		hardwareMap=spareMap;
+	}
 
+	public void initVuforia(){
+		cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+		parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+		parameters.vuforiaLicenseKey = "Ac8Q0nb/////AAAAGZRBQQCid0gNt3ydtz8W8gB8MrlkYn+Gu+jvldH+Igx9SypXvRwUWJw/71iF8xhpjKXBDv1UDD+EsjkvvC1+Zko/hF+lZG/TglT50MCsw6/q2MuSc+AUFDqT9lhEJcyroMMp20VPNwj/fUoUAxr5DV4+VUdwwYW/sCML6iL/x0rWEzUGxJf8qvKSrZcI/4X2fWsryCaprTXecsZCTudHQiElph2GCtMva4843D9sx+a6NB9zhPiyn6aaydEs5T4Ygc5o2nK1p6o8G82++XtlDYPkBuVBajLsO6z0Zvk980xIWmgyKjMNZlLofM7lLJdjt5Sh4a1imlIlsAWbQqPvs35MxJLmmrugrO7WXXveK4TY";
+
+		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+		this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+
+		relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
+		relicTemplate = relicTrackables.get(0);
+		relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+	}
+	
+	public void initHardware(){
 		frontLeft = hardwareMap.dcMotor.get("front left wheel");
 		frontRight = hardwareMap.dcMotor.get("front right wheel");
 		backLeft = hardwareMap.dcMotor.get("back left wheel");
@@ -96,36 +129,32 @@ public class Scorpion {
 		backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 		setDriveMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 		setDriveMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
+		
 		lift1=hardwareMap.dcMotor.get("lift1");
 		lift2=hardwareMap.dcMotor.get("lift2");
 		lift2.setDirection(DcMotorSimple.Direction.REVERSE);
-		lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-		lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-		lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-		lift1.setPower(liftPower);
-		lift2.setPower(liftPower);
+		setLiftMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+		setLiftMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		setLiftMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 		inputML=hardwareMap.dcMotor.get("inputML");
 		inputMR=hardwareMap.dcMotor.get("inputMR");
 		inputML.setDirection(DcMotorSimple.Direction.REVERSE);
 		inputML.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		inputMR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+		
 		trayServo=hardwareMap.servo.get("trayServo");
 		relicGrabber=hardwareMap.servo.get("relicServo");
 		jewelPusher=hardwareMap.servo.get("jewelPusher");
 		extender=hardwareMap.servo.get("extender");
 
-		setTrayToIntake();
-		jewelPusher.setPosition(jewelPusherUpPosition);
-		setGrabberToGrabbed();
-
-		/*MRColor=hardwareMap.colorSensor.get("MR Color Sensor");
-		MRColor.enableLed(true);*/
+		MRColor=hardwareMap.colorSensor.get("Color");
 	}
-
+	
+	String format(OpenGLMatrix transformationMatrix) {
+		return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+	}
+	
 	public void rightIntake (double power) {
 		inputMR.setPower(power*.4);
 	}
@@ -188,14 +217,48 @@ public class Scorpion {
 		telemetry.addData("ready to place over 3 cubes", "");
 	}
 
+	public void setMotorEncoderForward(int distance) {
+		frontLeft.setTargetPosition(distance);
+		frontRight.setTargetPosition(-distance);
+		backLeft.setTargetPosition(-distance);
+		backRight.setTargetPosition(distance);
+	}
+	public void setMotorEncoderBackward(int distance) {
+		frontLeft.setTargetPosition(-distance);
+		frontRight.setTargetPosition(distance);
+		backLeft.setTargetPosition(distance);
+		backRight.setTargetPosition(-distance);
+	}
+	public void setMotorEncoderLeft(int distance) {
+		frontLeft.setTargetPosition(-distance);
+		frontRight.setTargetPosition(-distance);
+		backLeft.setTargetPosition(-distance);
+		backRight.setTargetPosition(-distance);
+	}
+	public void setMotorEncoderRight(int distance) {
+		frontLeft.setTargetPosition(distance);
+		frontRight.setTargetPosition(distance);
+		backLeft.setTargetPosition(distance);
+		backRight.setTargetPosition(distance);
+	}
+	public void setMotorEncoderClockwise(int distance) {
+		frontLeft.setTargetPosition(-distance);
+		frontRight.setTargetPosition(distance);
+		backLeft.setTargetPosition(-distance);
+		backRight.setTargetPosition(distance);
+	}
+	public void setMotorEncoderCounterwise(int distance) {
+		frontLeft.setTargetPosition(distance);
+		frontRight.setTargetPosition(-distance);
+		backLeft.setTargetPosition(distance);
+		backRight.setTargetPosition(-distance);
+	}
+
 	//TODO: implement acceleration and deceleration into this to prevent sliding
 	public void driveForwardEncoder(double power, int distance) {
 		setDriveMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 		int frontLDist, frontRDist, backLDist, backRDist;
-		frontLeft.setTargetPosition(distance*ticksPerInch+frontLeft.getCurrentPosition());
-		frontRight.setTargetPosition(-distance*ticksPerInch+frontRight.getCurrentPosition());
-		backLeft.setTargetPosition(-distance*ticksPerInch+backLeft.getCurrentPosition());
-		backRight.setTargetPosition(distance*ticksPerInch+backRight.getCurrentPosition());
+		setMotorEncoderForward(distance*ticksPerInch+frontLeft.getCurrentPosition());
 
 		setToForward(power);
 		do{
@@ -210,20 +273,17 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-					frontLDist>encoderSafeZone &&
-					frontRDist>encoderSafeZone &&
-					backLDist>encoderSafeZone &&
-					backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
 	public void driveBackwardEncoder(double power, int distance) {
 		setDriveMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 		int frontLDist, frontRDist, backLDist, backRDist;
-		frontLeft.setTargetPosition(-distance*ticksPerInch+frontLeft.getCurrentPosition());
-		frontRight.setTargetPosition(distance*ticksPerInch+frontRight.getCurrentPosition());
-		backLeft.setTargetPosition(distance*ticksPerInch+backLeft.getCurrentPosition());
-		backRight.setTargetPosition(-distance*ticksPerInch+backRight.getCurrentPosition());
+		setMotorEncoderBackward(distance*ticksPerInch+frontLeft.getCurrentPosition());
 
 		setToForward(power);
 		do{
@@ -238,20 +298,17 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
 	public void driveLeftEncoder(double power, int distance) {
 		setDriveMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 		int frontLDist, frontRDist, backLDist, backRDist;
-		frontLeft.setTargetPosition(-distance*ticksPerInch+frontLeft.getCurrentPosition());
-		frontRight.setTargetPosition(-distance*ticksPerInch+frontRight.getCurrentPosition());
-		backLeft.setTargetPosition(-distance*ticksPerInch+backLeft.getCurrentPosition());
-		backRight.setTargetPosition(-distance*ticksPerInch+backRight.getCurrentPosition());
+		setMotorEncoderLeft(distance*ticksPerInch+frontLeft.getCurrentPosition());
 
 		setToForward(power);
 		do{
@@ -266,21 +323,17 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
 	public void driveRightEncoder(double power, int distance) {
 		setDriveMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 		int frontLDist, frontRDist, backLDist, backRDist;
-		frontLeft.setTargetPosition(distance*ticksPerInch+frontLeft.getCurrentPosition());
-		frontRight.setTargetPosition(distance*ticksPerInch+frontRight.getCurrentPosition());
-		backLeft.setTargetPosition(distance*ticksPerInch+backLeft.getCurrentPosition());
-		backRight.setTargetPosition(distance*ticksPerInch+backRight.getCurrentPosition());
-
+		setMotorEncoderRight(distance*ticksPerInch+frontLeft.getCurrentPosition());
 		setToForward(power);
 		do{
 			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
@@ -294,20 +347,17 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
 	public void turnClockwiseEncoder(double power, int distance) {
 		setDriveMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 		int frontLDist, frontRDist, backLDist, backRDist;
-		frontLeft.setTargetPosition(-distance*ticksPerInch+frontLeft.getCurrentPosition());
-		frontRight.setTargetPosition(distance*ticksPerInch+frontRight.getCurrentPosition());
-		backLeft.setTargetPosition(-distance*ticksPerInch+backLeft.getCurrentPosition());
-		backRight.setTargetPosition(distance*ticksPerInch+backRight.getCurrentPosition());
+		setMotorEncoderClockwise(distance*ticksPerInch+frontLeft.getCurrentPosition());
 
 		setToForward(power);
 		do{
@@ -322,20 +372,17 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
 	public void turnCounterwiseEncoder(double power, int distance) {
 		setDriveMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 		int frontLDist, frontRDist, backLDist, backRDist;
-		frontLeft.setTargetPosition(distance*ticksPerInch+frontLeft.getCurrentPosition());
-		frontRight.setTargetPosition(-distance*ticksPerInch+frontRight.getCurrentPosition());
-		backLeft.setTargetPosition(distance*ticksPerInch+backLeft.getCurrentPosition());
-		backRight.setTargetPosition(-distance*ticksPerInch+backRight.getCurrentPosition());
+		setMotorEncoderCounterwise(distance*ticksPerInch+frontLeft.getCurrentPosition());
 
 		setToForward(power);
 		do{
@@ -350,17 +397,16 @@ public class Scorpion {
 			telemetry.addData("backRight distanceFrom: ",backRDist);
 			telemetry.update();
 		}while(
-				frontLDist>encoderSafeZone &&
-						frontRDist>encoderSafeZone &&
-						backLDist>encoderSafeZone &&
-						backRDist>encoderSafeZone
+			frontLDist>encoderSafeZone &&
+			frontRDist>encoderSafeZone &&
+			backLDist>encoderSafeZone &&
+			backRDist>encoderSafeZone
 				);
 		setToStill();
 	}
 
 	public void setDriveMotorMode(DcMotor.RunMode mode) {
-		switch(mode)
-		{
+		switch(mode) {
 			case RUN_USING_ENCODER:
 				if(frontLeft.getMode()==DcMotor.RunMode.RUN_USING_ENCODER)
 					break;
@@ -415,6 +461,46 @@ public class Scorpion {
 		backLeft.setPower(power);
 		backRight.setPower(power);
 	}//for use with driveEncoder methods
+	
+	public void setLiftMotorMode(DcMotor.RunMode mode){
+		switch(mode) {
+			case RUN_USING_ENCODER:
+				if(lift1.getMode()==DcMotor.RunMode.RUN_USING_ENCODER)
+					break;
+				lift1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+				lift2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);break;
+			case RUN_WITHOUT_ENCODER:
+				if(lift1.getMode()==DcMotor.RunMode.RUN_WITHOUT_ENCODER)
+					break;
+				lift1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+				lift2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);break;
+			case STOP_AND_RESET_ENCODER:
+				if(lift1.getMode()==DcMotor.RunMode.STOP_AND_RESET_ENCODER)
+					break;
+				lift1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+				lift2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);break;
+			case RUN_TO_POSITION:
+				if(lift1.getMode()==DcMotor.RunMode.RUN_TO_POSITION)
+					break;
+				lift1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+				lift2.setMode(DcMotor.RunMode.RUN_TO_POSITION);break;
+		}
+	}
+	public void setLiftMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior behavior){
+		switch(behavior) {
+			case BRAKE:
+				if(lift1.getZeroPowerBehavior()==DcMotor.ZeroPowerBehavior.BRAKE)
+					break;
+				lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+				lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);;break;
+			case FLOAT:
+				if(lift1.getZeroPowerBehavior()==DcMotor.ZeroPowerBehavior.FLOAT)
+					break;
+				lift1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+				lift2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);break;
+		}
+	}
+
 	public void waiter(int time) {
 		timer.reset();
 		while(timer.milliseconds()<time){}
@@ -423,35 +509,33 @@ public class Scorpion {
 	//jewel pusher method
 	public void pushJewel(String teamColor){
 		jewelPusher.setPosition(jewelPusherDownPosition);
-		MRColor.enableLed(false);
-		MRColor.enableLed(true);
-		waiter(1000);
+		waiter(500);
 		if(teamColor.equals("Blue")){
 			if(MRColor.blue()>MRColor.red()){
 				telemetry.addData("Blue","");
-				turnClockwiseEncoder(1,3);
+				turnClockwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				turnCounterwiseEncoder(1,3);
+				turnCounterwiseEncoder(.25,3);
 			}
 			else{
 				telemetry.addData("Red","");
-				turnCounterwiseEncoder(1,3);
+				turnCounterwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				turnClockwiseEncoder(1,3);
+				turnClockwiseEncoder(.25,3);
 			}
 		}
 		if(teamColor == "Red"){
 			if(MRColor.red()>MRColor.blue()){
 				telemetry.addData("Red","");
-				turnClockwiseEncoder(1,3);
+				turnClockwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				turnCounterwiseEncoder(1,3);
+				turnCounterwiseEncoder(.25,3);
 			}
 			else{
 				telemetry.addData("Blue","");
-				turnCounterwiseEncoder(1,3);
+				turnCounterwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				turnClockwiseEncoder(1,3);
+				turnClockwiseEncoder(.25,3);
 			}
 		}
 	}
@@ -565,31 +649,28 @@ public class Scorpion {
 //		}
 //		setToStill();
 //	}
-	public int decodePictograph(){ //returns a distance value for the robot to travel
-		int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-		VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
-		parameters.vuforiaLicenseKey = "Ac8Q0nb/////AAAAGZRBQQCid0gNt3ydtz8W8gB8MrlkYn+Gu+jvldH+Igx9SypXvRwUWJw/71iF8xhpjKXBDv1UDD+EsjkvvC1+Zko/hF+lZG/TglT50MCsw6/q2MuSc+AUFDqT9lhEJcyroMMp20VPNwj/fUoUAxr5DV4+VUdwwYW/sCML6iL/x0rWEzUGxJf8qvKSrZcI/4X2fWsryCaprTXecsZCTudHQiElph2GCtMva4843D9sx+a6NB9zhPiyn6aaydEs5T4Ygc5o2nK1p6o8G82++XtlDYPkBuVBajLsO6z0Zvk980xIWmgyKjMNZlLofM7lLJdjt5Sh4a1imlIlsAWbQqPvs35MxJLmmrugrO7WXXveK4TY";
 
-		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-		this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
-
-		VuforiaTrackables relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
-		VuforiaTrackable relicTemplate = relicTrackables.get(0);
-		relicTemplate.setName("relicVuMarkTemplate");
-		RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(relicTemplate);
-		if (vuMark != RelicRecoveryVuMark.UNKNOWN) {
-			telemetry.addData("VuMark", "%s visible", vuMark);
-			if(vuMark == RelicRecoveryVuMark.LEFT)
-				return 0;
-			if(vuMark == RelicRecoveryVuMark.CENTER)
-				return 6;
-			if(vuMark == RelicRecoveryVuMark.RIGHT)
-				return 12;
+	public int waitUntilVuMarkIsFound() { //returns a distance for the robot to travel
+		final int defaultDistance=0;
+		int driveDistance=0;
+		ElapsedTime check=new ElapsedTime();
+		RelicRecoveryVuMark vuMark=RelicRecoveryVuMark.from(relicTemplate);
+		while(vuMark==RelicRecoveryVuMark.UNKNOWN){
+			vuMark = RelicRecoveryVuMark.from(relicTemplate);
+			if (vuMark != RelicRecoveryVuMark.UNKNOWN){
+				telemetry.addData("VuMark", "%s visible", vuMark);
+				if(vuMark.equals(RelicRecoveryVuMark.CENTER)) //If left go the default distance
+					driveDistance=8;
+				if(vuMark.equals(RelicRecoveryVuMark.RIGHT))
+					driveDistance=15;
+				return driveDistance;
+			}
+			else
+				telemetry.addData("VuMark", "not visible");
+			if(check.milliseconds()>vuforiaTimeoutTime) //if it takes too long to find a vuMark quit the method
+				break;
+			telemetry.update();
 		}
-		else {
-			telemetry.addData("VuMark", "not visible");
-		}
-		telemetry.update();
-		return 0;
+		return defaultDistance;
 	}
 }
