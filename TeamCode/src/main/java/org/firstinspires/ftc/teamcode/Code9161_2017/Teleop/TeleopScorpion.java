@@ -33,7 +33,7 @@ public class TeleopScorpion extends OpMode
 		if(gamepad1.a && !aWasPressed)
 			inReverse=!inReverse;
 		aWasPressed=gamepad1.a;
-		//first we must translate the rectangular values of the joystick into polar coordinates;
+		//first we must translate the rectangular values of the joystick into polar coordinates
 		double y=-1*gamepad1.left_stick_y;
 		double x=gamepad1.left_stick_x;
 		double angle=0;
@@ -53,8 +53,11 @@ public class TeleopScorpion extends OpMode
 			angle=Math.PI;
 		if(y<0 && x==0)
 			angle=3*Math.PI/2;
+		angle+=Math.toRadians(90);
+		//now we get the velocity of the robot based on the distance the disanctance the sticks are from the origen
 		double velocity=Math.sqrt(Math.pow(gamepad1.left_stick_y, 2)+Math.pow(gamepad1.left_stick_x, 2));
-		double rotation=gamepad1.right_stick_x;
+		//now we get the rotation simply based on the right stick's horizontal x value
+		double rotation=gamepad1.right_stick_x*-1;
 
 		if(inReverse)//reverse button
 			angle+=Math.toRadians(180);

@@ -49,7 +49,7 @@ public class Scorpion {
 	Servo relicGrabber;
 	Servo extender;
 
-	ColorSensor MRColor;
+	//ColorSensor MRColor;
 	Telemetry telemetry;
 	HardwareMap hardwareMap;
 
@@ -99,7 +99,7 @@ public class Scorpion {
 		jewelPusher.setPosition(jewelPusherUpPosition);
 		setGrabberToGrabbed();
 
-		MRColor.enableLed(true);
+		//MRColor.enableLed(true);
 	}
 
 	public void getOpmodeVariables(HardwareMap spareMap, Telemetry tempTelemetry) {
@@ -148,7 +148,7 @@ public class Scorpion {
 		jewelPusher=hardwareMap.servo.get("jewelPusher");
 		extender=hardwareMap.servo.get("extender");
 
-		MRColor=hardwareMap.colorSensor.get("Color");
+		//MRColor=hardwareMap.colorSensor.get("Color");
 	}
 	
 	String format(OpenGLMatrix transformationMatrix) {
@@ -405,6 +405,162 @@ public class Scorpion {
 		setToStill();
 	}
 
+	public void driveForwardOneEncoder(double power, int distance) {
+		runWithOneEncoder();
+		int frontLDist, frontRDist, backLDist, backRDist;
+		setMotorEncoderForward(distance*ticksPerInch+frontLeft.getCurrentPosition());
+
+		setToForward(power);
+		do{
+			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
+			frontRDist=Math.abs(frontRight.getTargetPosition()-frontRight.getCurrentPosition());
+			backLDist=Math.abs(backLeft.getTargetPosition()-backLeft.getCurrentPosition());
+			backRDist=Math.abs(backRight.getTargetPosition()-backRight.getCurrentPosition());
+
+			telemetry.addData("frontLeft distanceFrom: ",frontLDist);
+			telemetry.addData("frontRight distanceFrom: ",frontRDist);
+			telemetry.addData("backLeft distanceFrom: ",backLDist);
+			telemetry.addData("backRight distanceFrom: ",backRDist);
+			telemetry.update();
+		}while(
+				frontLDist>encoderSafeZone &&
+						frontRDist>encoderSafeZone &&
+						backLDist>encoderSafeZone &&
+						backRDist>encoderSafeZone
+				);
+		setToStill();
+	}
+	public void driveBackwardOneEncoder(double power, int distance) {
+		runWithOneEncoder();
+		int frontLDist, frontRDist, backLDist, backRDist;
+		setMotorEncoderBackward(distance*ticksPerInch+frontLeft.getCurrentPosition());
+
+		setToForward(power);
+		do{
+			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
+			frontRDist=Math.abs(frontRight.getTargetPosition()-frontRight.getCurrentPosition());
+			backLDist=Math.abs(backLeft.getTargetPosition()-backLeft.getCurrentPosition());
+			backRDist=Math.abs(backRight.getTargetPosition()-backRight.getCurrentPosition());
+
+			telemetry.addData("frontLeft distanceFrom: ",frontLDist);
+			telemetry.addData("frontRight distanceFrom: ",frontRDist);
+			telemetry.addData("backLeft distanceFrom: ",backLDist);
+			telemetry.addData("backRight distanceFrom: ",backRDist);
+			telemetry.update();
+		}while(
+				frontLDist>encoderSafeZone &&
+						frontRDist>encoderSafeZone &&
+						backLDist>encoderSafeZone &&
+						backRDist>encoderSafeZone
+				);
+		setToStill();
+	}
+	public void driveLeftOneEncoder(double power, int distance) {
+		runWithOneEncoder();
+		int frontLDist, frontRDist, backLDist, backRDist;
+		setMotorEncoderLeft(distance*ticksPerInch+frontLeft.getCurrentPosition());
+
+		setToForward(power);
+		do{
+			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
+			frontRDist=Math.abs(frontRight.getTargetPosition()-frontRight.getCurrentPosition());
+			backLDist=Math.abs(backLeft.getTargetPosition()-backLeft.getCurrentPosition());
+			backRDist=Math.abs(backRight.getTargetPosition()-backRight.getCurrentPosition());
+
+			telemetry.addData("frontLeft distanceFrom: ",frontLDist);
+			telemetry.addData("frontRight distanceFrom: ",frontRDist);
+			telemetry.addData("backLeft distanceFrom: ",backLDist);
+			telemetry.addData("backRight distanceFrom: ",backRDist);
+			telemetry.update();
+		}while(
+				frontLDist>encoderSafeZone &&
+						frontRDist>encoderSafeZone &&
+						backLDist>encoderSafeZone &&
+						backRDist>encoderSafeZone
+				);
+		setToStill();
+	}
+	public void driveRightOneEncoder(double power, int distance) {
+		runWithOneEncoder();
+		int frontLDist, frontRDist, backLDist, backRDist;
+		setMotorEncoderRight(distance*ticksPerInch+frontLeft.getCurrentPosition());
+		setToForward(power);
+		do{
+			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
+			frontRDist=Math.abs(frontRight.getTargetPosition()-frontRight.getCurrentPosition());
+			backLDist=Math.abs(backLeft.getTargetPosition()-backLeft.getCurrentPosition());
+			backRDist=Math.abs(backRight.getTargetPosition()-backRight.getCurrentPosition());
+
+			telemetry.addData("frontLeft distanceFrom: ",frontLDist);
+			telemetry.addData("frontRight distanceFrom: ",frontRDist);
+			telemetry.addData("backLeft distanceFrom: ",backLDist);
+			telemetry.addData("backRight distanceFrom: ",backRDist);
+			telemetry.update();
+		}while(
+				frontLDist>encoderSafeZone &&
+						frontRDist>encoderSafeZone &&
+						backLDist>encoderSafeZone &&
+						backRDist>encoderSafeZone
+				);
+		setToStill();
+	}
+	public void turnClockwiseOneEncoder(double power, int distance) {
+		runWithOneEncoder();
+		int frontLDist, frontRDist, backLDist, backRDist;
+		setMotorEncoderClockwise(distance*ticksPerInch+frontLeft.getCurrentPosition());
+
+		setToForward(power);
+		do{
+			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
+			frontRDist=Math.abs(frontRight.getTargetPosition()-frontRight.getCurrentPosition());
+			backLDist=Math.abs(backLeft.getTargetPosition()-backLeft.getCurrentPosition());
+			backRDist=Math.abs(backRight.getTargetPosition()-backRight.getCurrentPosition());
+
+			telemetry.addData("frontLeft distanceFrom: ",frontLDist);
+			telemetry.addData("frontRight distanceFrom: ",frontRDist);
+			telemetry.addData("backLeft distanceFrom: ",backLDist);
+			telemetry.addData("backRight distanceFrom: ",backRDist);
+			telemetry.update();
+		}while(
+				frontLDist>encoderSafeZone &&
+						frontRDist>encoderSafeZone &&
+						backLDist>encoderSafeZone &&
+						backRDist>encoderSafeZone
+				);
+		setToStill();
+	}
+	public void turnCounterwiseOneEncoder(double power, int distance) {
+		runWithOneEncoder();
+		int frontLDist, frontRDist, backLDist, backRDist;
+		setMotorEncoderCounterwise(distance*ticksPerInch+frontLeft.getCurrentPosition());
+
+		setToForward(power);
+		do{
+			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
+			frontRDist=Math.abs(frontRight.getTargetPosition()-frontRight.getCurrentPosition());
+			backLDist=Math.abs(backLeft.getTargetPosition()-backLeft.getCurrentPosition());
+			backRDist=Math.abs(backRight.getTargetPosition()-backRight.getCurrentPosition());
+
+			telemetry.addData("frontLeft distanceFrom: ",frontLDist);
+			telemetry.addData("frontRight distanceFrom: ",frontRDist);
+			telemetry.addData("backLeft distanceFrom: ",backLDist);
+			telemetry.addData("backRight distanceFrom: ",backRDist);
+			telemetry.update();
+		}while(
+				frontLDist>encoderSafeZone &&
+						frontRDist>encoderSafeZone &&
+						backLDist>encoderSafeZone &&
+						backRDist>encoderSafeZone
+				);
+		setToStill();
+	}
+
+	public void runWithOneEncoder(){
+		frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+		frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	}
 	public void setDriveMotorMode(DcMotor.RunMode mode) {
 		switch(mode) {
 			case RUN_USING_ENCODER:
@@ -510,7 +666,7 @@ public class Scorpion {
 	public void pushJewel(String teamColor){
 		jewelPusher.setPosition(jewelPusherDownPosition);
 		waiter(500);
-		if(teamColor.equals("Blue")){
+		/*if(teamColor.equals("Blue")){
 			if(MRColor.blue()>MRColor.red()){
 				telemetry.addData("Blue","");
 				turnClockwiseEncoder(.25,3);
@@ -537,7 +693,7 @@ public class Scorpion {
 				jewelPusher.setPosition(jewelPusherUpPosition);
 				turnClockwiseEncoder(.25,3);
 			}
-		}
+		}*/
 	}
 
 	//driveTime methods
@@ -575,37 +731,37 @@ public class Scorpion {
 
 	//setTo methods
 	//TODO: there may be a more efficient way to write these methods
-	public void setToRight(double power) {
+	public void setToForward(double power) {
 		frontLeft.setPower(power);
 		frontRight.setPower(power);
 		backLeft.setPower(power);
 		backRight.setPower(power);
 	}
-	public void setToLeft(double power) {
+	public void setToBackward(double power) {
 		frontLeft.setPower(-1 * power);
 		frontRight.setPower(-1 * power);
 		backLeft.setPower(-1 * power);
 		backRight.setPower(-1 * power);
 	}
-	public void setToClockwise(double power) {
+	public void setToCounterwise(double power) {
 		frontLeft.setPower(-1 * power);
 		frontRight.setPower(1 * power);
 		backLeft.setPower(-1 * power);
 		backRight.setPower(1 * power);
 	}
-	public void setToCounterwise(double power) {
+	public void setToClockwise(double power) {
 		frontLeft.setPower(1 * power);
 		frontRight.setPower(-1 * power);
 		backLeft.setPower(1 * power);
 		backRight.setPower(-1 * power);
 	}
-	public void setToForward(double power) {
+	public void setToRight(double power) {
 		frontLeft.setPower(1 * power);
 		frontRight.setPower(-1 * power);
 		backLeft.setPower(-1 * power);
 		backRight.setPower(1 * power);
 	}
-	public void setToBackward(double power) {
+	public void setToLeft(double power) {
 		frontLeft.setPower(-1 * power);
 		frontRight.setPower(1 * power);
 		backLeft.setPower(1 * power);
