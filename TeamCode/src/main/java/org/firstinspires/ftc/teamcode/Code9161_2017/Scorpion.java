@@ -1,36 +1,20 @@
 package org.firstinspires.ftc.teamcode.Code9161_2017;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
-import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.ColorSensor;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -73,7 +57,7 @@ public class Scorpion {
 	ElapsedTime timer = new ElapsedTime();
 
 	private static final double initialTrayPosition=.943;
-	private static final double parallelTrayPosistion=.673;
+	private static final double parallelTrayPosition =.673;
 	private static final double placementTrayPosition=0.06;
 
 	private static final double jewelPusherDownPosition=.92;
@@ -115,7 +99,6 @@ public class Scorpion {
 		telemetry = tempTelemetry;
 		hardwareMap=spareMap;
 	}
-
 	public void initVuforia(){
 		cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
 		parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
@@ -128,7 +111,6 @@ public class Scorpion {
 		relicTemplate = relicTrackables.get(0);
 		relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
 	}
-
 	public void initGyro() {
 		gyroParameters = new BNO055IMU.Parameters();
 		gyroParameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
@@ -142,9 +124,9 @@ public class Scorpion {
 		rev2 = hardwareMap.get(BNO055IMU.class, "rev2");
 		rev1.initialize(gyroParameters);
 		rev2.initialize(gyroParameters);
-		while(rev1.isGyroCalibrated()||rev2.isGyroCalibrated()){}
+		//maybe commenting out this while loop will fix the problem, other people don't seem to have it
+		//while(rev1.isGyroCalibrated()||rev2.isGyroCalibrated()){}
 	}
-	
 	public void initHardware(){
 		frontLeft = hardwareMap.dcMotor.get("front left wheel");
 		frontRight = hardwareMap.dcMotor.get("front right wheel");
@@ -193,7 +175,7 @@ public class Scorpion {
 	public void setTrayToPlace() {
 		trayServo.setPosition(placementTrayPosition);
 	}
-	public void setTrayToParallel() {trayServo.setPosition(parallelTrayPosistion);}
+	public void setTrayToParallel() {trayServo.setPosition(parallelTrayPosition);}
 
 	public void extenderOut(){
 		extender.setPosition(1);
@@ -244,39 +226,39 @@ public class Scorpion {
 
 	public void setMotorEncoderForward(int distance) {
 		frontLeft.setTargetPosition(distance);
-		frontRight.setTargetPosition(-distance);
-		backLeft.setTargetPosition(-distance);
+		frontRight.setTargetPosition(distance);
+		backLeft.setTargetPosition(distance);
 		backRight.setTargetPosition(distance);
 	}
 	public void setMotorEncoderBackward(int distance) {
 		frontLeft.setTargetPosition(-distance);
-		frontRight.setTargetPosition(distance);
-		backLeft.setTargetPosition(distance);
+		frontRight.setTargetPosition(-distance);
+		backLeft.setTargetPosition(-distance);
 		backRight.setTargetPosition(-distance);
 	}
 	public void setMotorEncoderLeft(int distance) {
 		frontLeft.setTargetPosition(-distance);
-		frontRight.setTargetPosition(-distance);
-		backLeft.setTargetPosition(-distance);
+		frontRight.setTargetPosition(distance);
+		backLeft.setTargetPosition(distance);
 		backRight.setTargetPosition(-distance);
 	}
 	public void setMotorEncoderRight(int distance) {
 		frontLeft.setTargetPosition(distance);
-		frontRight.setTargetPosition(distance);
-		backLeft.setTargetPosition(distance);
-		backRight.setTargetPosition(distance);
-	}
-	public void setMotorEncoderClockwise(int distance) {
-		frontLeft.setTargetPosition(-distance);
-		frontRight.setTargetPosition(distance);
+		frontRight.setTargetPosition(-distance);
 		backLeft.setTargetPosition(-distance);
 		backRight.setTargetPosition(distance);
 	}
-	public void setMotorEncoderCounterwise(int distance) {
+	public void setMotorEncoderClockwise(int distance) {
 		frontLeft.setTargetPosition(distance);
 		frontRight.setTargetPosition(-distance);
 		backLeft.setTargetPosition(distance);
 		backRight.setTargetPosition(-distance);
+	}
+	public void setMotorEncoderCounterwise(int distance) {
+		frontLeft.setTargetPosition(-distance);
+		frontRight.setTargetPosition(distance);
+		backLeft.setTargetPosition(-distance);
+		backRight.setTargetPosition(distance);
 	}
 
 	//TODO: implement acceleration and deceleration into this to prevent sliding
@@ -430,12 +412,6 @@ public class Scorpion {
 		setToStill();
 	}
 
-	public void runWithOneEncoder(){
-		frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-		frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-	}
 	public void setDriveMotorMode(DcMotor.RunMode mode) {
 		switch(mode) {
 			case RUN_USING_ENCODER:
