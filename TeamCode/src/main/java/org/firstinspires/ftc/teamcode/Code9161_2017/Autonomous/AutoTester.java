@@ -18,11 +18,7 @@ public class AutoTester extends LinearOpMode {
 
         waitForStart();
 
-        r.driveForwardTime(.25,500);
-        r.driveBackwardTime(.25,500);
-        r.driveLeftTime(.25,500);
-        r.driveRightTime(.25,500);
-        r.driveCounterwiseTime(.25,500);
-        r.driveClockwiseTime(.25,500);
+        /*r.turnAbsolute(90,1);
+        r.turnAbsolute(-90,1);*/
     }
 }

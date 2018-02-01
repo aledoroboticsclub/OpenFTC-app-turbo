@@ -17,9 +17,9 @@ public class AutonomousBlue2 extends LinearOpMode {
         waitForStart();
 
         r.relicTrackables.activate();
-        r.driveLeftOneEncoder(.1,2);
+
         r.pushJewel("Blue");
-        r.driveRightOneEncoder(.25,40);
+
 //        r.turnClockwiseEncoder(.25,21);
 //        int pictographDistance = r.waitUntilVuMarkIsFound();
 //        r.driveLeftEncoder(.25,48);
