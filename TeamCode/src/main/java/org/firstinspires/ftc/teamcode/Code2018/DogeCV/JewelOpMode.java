@@ -1,17 +1,11 @@
 
-package org.firstinspires.ftc.teamcode.Code9161_2017.DogeCV;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+package org.firstinspires.ftc.teamcode.Code2018.DogeCV;
 
 import com.disnodeteam.dogecv.CameraViewDisplay;
 import com.disnodeteam.dogecv.detectors.*;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import java.io.IOException;
 
 
 @Autonomous(name="DogeCV Jewel Detector", group="DogeCV")

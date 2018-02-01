@@ -1,9 +1,9 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017.Autonomous;
+package org.firstinspires.ftc.teamcode.Code2018.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.Code9161_2017.Scorpion;
+import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
 
 /**
  * Created by jreynoldsstudent on 1/4/2018.

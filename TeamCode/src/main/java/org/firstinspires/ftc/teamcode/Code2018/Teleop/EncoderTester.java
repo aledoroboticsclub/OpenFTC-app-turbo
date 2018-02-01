@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
+package org.firstinspires.ftc.teamcode.Code2018.Teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Code9161_2017.Scorpion;
+import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
 //the purpose of this program is to test specific user controlled distances, and be able to see the
 //corresponding encoder value necessary to reach that distance in RUN_TO_POSITION mode
 //due to the simplistic nature of the program, it will only work on movements where all motors move

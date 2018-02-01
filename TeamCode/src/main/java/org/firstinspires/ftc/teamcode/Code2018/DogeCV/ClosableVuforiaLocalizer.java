@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017.DogeCV;
+package org.firstinspires.ftc.teamcode.Code2018.DogeCV;
 
 import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaLocalizerImpl;
 

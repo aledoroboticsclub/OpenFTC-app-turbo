@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
+package org.firstinspires.ftc.teamcode.Code2018.Teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.Code9161_2017.Scorpion;
+import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
 //uses acceleration to modify a velocity variable which is what is used for power
 //in progress
 

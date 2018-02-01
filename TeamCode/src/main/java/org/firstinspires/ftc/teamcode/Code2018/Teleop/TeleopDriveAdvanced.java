@@ -1,11 +1,10 @@
-package org.firstinspires.ftc.teamcode.Code9161_2017.Teleop;
+package org.firstinspires.ftc.teamcode.Code2018.Teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.Code9161_2017.Scorpion;
+import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
 
 import java.text.DecimalFormat;
 //all motor values are independantly determined by formulas found on internet for mecanum drive
