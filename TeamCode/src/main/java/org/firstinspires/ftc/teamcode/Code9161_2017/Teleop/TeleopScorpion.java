@@ -15,8 +15,9 @@ public class TeleopScorpion extends OpMode
 	Scorpion r=new Scorpion();
 	ElapsedTime runtime=new ElapsedTime();
 	public void init() {
+		telemetry.addLine("init begun");
 		r.initRobot(hardwareMap,telemetry);
-		telemetry.addData("init Complete","");
+		telemetry.addLine("init Complete");
 
 		telemetry.update();
 	}

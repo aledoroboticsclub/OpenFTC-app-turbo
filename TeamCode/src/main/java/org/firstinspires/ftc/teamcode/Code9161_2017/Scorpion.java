@@ -97,7 +97,7 @@ public class Scorpion {
 
 	public void initRobot(HardwareMap spareMap, Telemetry tempTelemetry) {
 		getOpmodeVariables(spareMap, tempTelemetry);
-		initGyro();
+		//initGyro();
 		initVuforia();
 		initHardware();
 
