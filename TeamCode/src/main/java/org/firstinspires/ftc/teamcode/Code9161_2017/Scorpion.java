@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Code9161_2017;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -49,7 +52,12 @@ public class Scorpion {
 	Servo relicGrabber;
 	Servo extender;
 
-	ColorSensor MRColor;
+	//ColorSensor MRColor;
+	BNO055IMU.Parameters gyroParameters;
+	BNO055IMU rev1;
+	BNO055IMU rev2;
+	int zAccumulated;
+
 	Telemetry telemetry;
 	HardwareMap hardwareMap;
 
@@ -89,6 +97,7 @@ public class Scorpion {
 
 	public void initRobot(HardwareMap spareMap, Telemetry tempTelemetry) {
 		getOpmodeVariables(spareMap, tempTelemetry);
+		//initGyro();
 		initVuforia();
 		initHardware();
 
@@ -99,7 +108,7 @@ public class Scorpion {
 		jewelPusher.setPosition(jewelPusherUpPosition);
 		setGrabberToGrabbed();
 
-		MRColor.enableLed(true);
+		//MRColor.enableLed(true);
 	}
 
 	public void getOpmodeVariables(HardwareMap spareMap, Telemetry tempTelemetry) {
@@ -118,6 +127,22 @@ public class Scorpion {
 		relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
 		relicTemplate = relicTrackables.get(0);
 		relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+	}
+
+	public void initGyro() {
+		gyroParameters = new BNO055IMU.Parameters();
+		gyroParameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+		gyroParameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+		gyroParameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+		gyroParameters.loggingEnabled      = true;
+		gyroParameters.loggingTag          = "IMU";
+		gyroParameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+		rev1 = hardwareMap.get(BNO055IMU.class, "rev1");
+		rev2 = hardwareMap.get(BNO055IMU.class, "rev2");
+		rev1.initialize(gyroParameters);
+		rev2.initialize(gyroParameters);
+		while(rev1.isGyroCalibrated()||rev2.isGyroCalibrated()){}
 	}
 	
 	public void initHardware(){
@@ -148,7 +173,7 @@ public class Scorpion {
 		jewelPusher=hardwareMap.servo.get("jewelPusher");
 		extender=hardwareMap.servo.get("extender");
 
-		MRColor=hardwareMap.colorSensor.get("Color");
+		//MRColor=hardwareMap.colorSensor.get("Color");
 	}
 	
 	String format(OpenGLMatrix transformationMatrix) {
@@ -382,29 +407,35 @@ public class Scorpion {
 	public void turnCounterwiseEncoder(double power, int distance) {
 		setDriveMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
 		int frontLDist, frontRDist, backLDist, backRDist;
-		setMotorEncoderCounterwise(distance*ticksPerInch+frontLeft.getCurrentPosition());
+		setMotorEncoderCounterwise(distance * ticksPerInch + frontLeft.getCurrentPosition());
 
 		setToForward(power);
-		do{
-			frontLDist=Math.abs(frontLeft.getTargetPosition()-frontLeft.getCurrentPosition());
-			frontRDist=Math.abs(frontRight.getTargetPosition()-frontRight.getCurrentPosition());
-			backLDist=Math.abs(backLeft.getTargetPosition()-backLeft.getCurrentPosition());
-			backRDist=Math.abs(backRight.getTargetPosition()-backRight.getCurrentPosition());
+		do {
+			frontLDist = Math.abs(frontLeft.getTargetPosition() - frontLeft.getCurrentPosition());
+			frontRDist = Math.abs(frontRight.getTargetPosition() - frontRight.getCurrentPosition());
+			backLDist = Math.abs(backLeft.getTargetPosition() - backLeft.getCurrentPosition());
+			backRDist = Math.abs(backRight.getTargetPosition() - backRight.getCurrentPosition());
 
-			telemetry.addData("frontLeft distanceFrom: ",frontLDist);
-			telemetry.addData("frontRight distanceFrom: ",frontRDist);
-			telemetry.addData("backLeft distanceFrom: ",backLDist);
-			telemetry.addData("backRight distanceFrom: ",backRDist);
+			telemetry.addData("frontLeft distanceFrom: ", frontLDist);
+			telemetry.addData("frontRight distanceFrom: ", frontRDist);
+			telemetry.addData("backLeft distanceFrom: ", backLDist);
+			telemetry.addData("backRight distanceFrom: ", backRDist);
 			telemetry.update();
-		}while(
-			frontLDist>encoderSafeZone &&
-			frontRDist>encoderSafeZone &&
-			backLDist>encoderSafeZone &&
-			backRDist>encoderSafeZone
+		} while (
+				frontLDist > encoderSafeZone &&
+						frontRDist > encoderSafeZone &&
+						backLDist > encoderSafeZone &&
+						backRDist > encoderSafeZone
 				);
 		setToStill();
 	}
 
+	public void runWithOneEncoder(){
+		frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+		frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	}
 	public void setDriveMotorMode(DcMotor.RunMode mode) {
 		switch(mode) {
 			case RUN_USING_ENCODER:
@@ -510,7 +541,7 @@ public class Scorpion {
 	public void pushJewel(String teamColor){
 		jewelPusher.setPosition(jewelPusherDownPosition);
 		waiter(500);
-		if(teamColor.equals("Blue")){
+		/*if(teamColor.equals("Blue")){
 			if(MRColor.blue()>MRColor.red()){
 				telemetry.addData("Blue","");
 				turnClockwiseEncoder(.25,3);
@@ -537,7 +568,7 @@ public class Scorpion {
 				jewelPusher.setPosition(jewelPusherUpPosition);
 				turnClockwiseEncoder(.25,3);
 			}
-		}
+		}*/
 	}
 
 	//driveTime methods
@@ -575,37 +606,37 @@ public class Scorpion {
 
 	//setTo methods
 	//TODO: there may be a more efficient way to write these methods
-	public void setToRight(double power) {
+	public void setToForward(double power) {
 		frontLeft.setPower(power);
 		frontRight.setPower(power);
 		backLeft.setPower(power);
 		backRight.setPower(power);
 	}
-	public void setToLeft(double power) {
+	public void setToBackward(double power) {
 		frontLeft.setPower(-1 * power);
 		frontRight.setPower(-1 * power);
 		backLeft.setPower(-1 * power);
 		backRight.setPower(-1 * power);
 	}
-	public void setToClockwise(double power) {
+	public void setToCounterwise(double power) {
 		frontLeft.setPower(-1 * power);
 		frontRight.setPower(1 * power);
 		backLeft.setPower(-1 * power);
 		backRight.setPower(1 * power);
 	}
-	public void setToCounterwise(double power) {
+	public void setToClockwise(double power) {
 		frontLeft.setPower(1 * power);
 		frontRight.setPower(-1 * power);
 		backLeft.setPower(1 * power);
 		backRight.setPower(-1 * power);
 	}
-	public void setToForward(double power) {
+	public void setToRight(double power) {
 		frontLeft.setPower(1 * power);
 		frontRight.setPower(-1 * power);
 		backLeft.setPower(-1 * power);
 		backRight.setPower(1 * power);
 	}
-	public void setToBackward(double power) {
+	public void setToLeft(double power) {
 		frontLeft.setPower(-1 * power);
 		frontRight.setPower(1 * power);
 		backLeft.setPower(1 * power);
@@ -618,37 +649,42 @@ public class Scorpion {
 		backRight.setPower(0);
 	}
 
+	/*public int getGyroAvgZ(){
+		return (rev1.rawZ()+rev2.rawZ())/2;
+	}*/
+
 	//TODO: must change so that it can work in SET_TO_POSTITION mode, maybe one for both modes
-//	public void turnAbsolute(int target, double power) {
-//		setDriveMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//		zAccumulated = gyro.getIntegratedZValue();  //Set variables to gyro readings
-//
-//		while (Math.abs(zAccumulated - target)  >0 )//Continue while the robot direction is further than three degrees from the target
-//		{
-//			telemetry.addData("heading: ",gyro.getHeading());
-//			telemetry.addData("integratedZValue: ",gyro.getIntegratedZValue());
-//			telemetry.update();
-//			if (zAccumulated > target)//if gyro is positive, turn counterwise
-//			{
-//				frontLeft.setPower(-power);
-//				frontRight.setPower(power);
-//				backLeft.setPower(-power);
-//				backRight.setPower(power);
-//			}
-//
-//			if (zAccumulated < target)//if gyro is negative, turn clockwise
-//			{
-//				frontLeft.setPower(power);
-//				frontRight.setPower(-power);
-//				backLeft.setPower(power);
-//				backRight.setPower(-power);
-//			}
-//			zAccumulated = gyro.getIntegratedZValue();  //Set variables to gyro readings
-//			telemetry.addData("accu", String.format("%03d", zAccumulated));
-//			telemetry.update();
-//		}
-//		setToStill();
-//	}
+	/*public void turnAbsolute(int target, double power) {
+		setDriveMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
+		zAccumulated = getGyroAvgZ();  //Set variables to gyro readings
+
+		while (Math.abs(zAccumulated - target)  >0 )//Continue while the robot direction is further than three degrees from the target
+		{
+			//telemetry.addData("rev1 heading: ",rev1.getHeading());
+			//telemetry.addData("rev2 heading: ",rev2.getHeading());
+			telemetry.addData("integratedZValue: ",getGyroAvgZ());
+			telemetry.update();
+			if (zAccumulated > target)//if gyro is positive, turn counterwise
+			{
+				frontLeft.setPower(-power);
+				frontRight.setPower(power);
+				backLeft.setPower(-power);
+				backRight.setPower(power);
+			}
+
+			if (zAccumulated < target)//if gyro is negative, turn clockwise
+			{
+				frontLeft.setPower(power);
+				frontRight.setPower(-power);
+				backLeft.setPower(power);
+				backRight.setPower(-power);
+			}
+			zAccumulated = getGyroAvgZ();  //Set variables to gyro readings
+			telemetry.addData("accu", String.format("%03d", zAccumulated));
+			telemetry.update();
+		}
+		setToStill();
+	}*/
 
 	public int waitUntilVuMarkIsFound() { //returns a distance for the robot to travel
 		final int defaultDistance=0;
