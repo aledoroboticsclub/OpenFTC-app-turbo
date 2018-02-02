@@ -9,19 +9,19 @@ import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
 /**
  * Created by jreynoldsstudent on 1/4/2018.
  */
-//@Disabled
+@Disabled
 
-@Autonomous(name="AutoTester", group="Linear Opmode")
-public class AutoTester extends LinearOpMode {
+@Autonomous(name="AutoTemplate", group="Linear Opmode")
+public class AutoTemplate extends LinearOpMode {
     Scorpion r = new Scorpion();
     @Override
     public void runOpMode() {
         r.initRobot(hardwareMap, telemetry);
+        r.initGyro();
         AutoTransitioner.transitionOnStop(this, "TeleopScorpion");
 
         waitForStart();
 
-        /*r.turnAbsolute(90,1);
-        r.turnAbsolute(-90,1);*/
+
     }
 }

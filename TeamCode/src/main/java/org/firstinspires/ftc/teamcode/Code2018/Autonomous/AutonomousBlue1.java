@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.Code2018.Autonomous;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
+//@Disabled
 
 @Autonomous(name="AutonomousBlue1", group="Linear OpMode")
 public class AutonomousBlue1 extends LinearOpMode {

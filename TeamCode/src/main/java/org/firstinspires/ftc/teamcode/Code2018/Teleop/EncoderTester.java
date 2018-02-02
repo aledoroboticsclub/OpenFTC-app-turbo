@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Code2018.Teleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -10,7 +11,8 @@ import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
 //due to the simplistic nature of the program, it will only work on movements where all motors move
 //by a common distance, i.e. turns in place, forward + backward, left + right
 @TeleOp(name="EncoderTester", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
-//@Disabled     //Determines if the program shows up on Driver Station
+//@Disabled
+     //Determines if the program shows up on Driver Station
 
 
 public class EncoderTester extends OpMode

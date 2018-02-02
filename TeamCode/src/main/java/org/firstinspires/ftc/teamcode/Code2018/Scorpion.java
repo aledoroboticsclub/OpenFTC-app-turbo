@@ -81,7 +81,6 @@ public class Scorpion {
 
 	public void initRobot(HardwareMap spareMap, Telemetry tempTelemetry) {
 		getOpmodeVariables(spareMap, tempTelemetry);
-		//initGyro();
 		initVuforia();
 		initHardware();
 
@@ -124,8 +123,6 @@ public class Scorpion {
 		rev2 = hardwareMap.get(BNO055IMU.class, "rev2");
 		rev1.initialize(gyroParameters);
 		rev2.initialize(gyroParameters);
-		//maybe commenting out this while loop will fix the problem, other people don't seem to have it
-		//while(rev1.isGyroCalibrated()||rev2.isGyroCalibrated()){}
 	}
 	public void initHardware(){
 		frontLeft = hardwareMap.dcMotor.get("front left wheel");
@@ -626,8 +623,9 @@ public class Scorpion {
 	}
 
 	/*public int getGyroAvgZ(){
-		return (rev1.rawZ()+rev2.rawZ())/2;
-	}*/
+		return (rev1.()+rev2.rawZ())/2;
+	}
+	rev1.*/
 
 	//TODO: must change so that it can work in SET_TO_POSTITION mode, maybe one for both modes
 	/*public void turnAbsolute(int target, double power) {
