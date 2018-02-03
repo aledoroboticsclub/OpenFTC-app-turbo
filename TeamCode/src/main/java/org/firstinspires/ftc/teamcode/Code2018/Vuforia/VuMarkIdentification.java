@@ -21,8 +21,6 @@ public class VuMarkIdentification extends LinearOpMode
 
         waitForStart();
 
-        r.relicTrackables.activate();
-
         while (opModeIsActive()) {
             RelicRecoveryVuMark vuMark = RelicRecoveryVuMark.from(r.relicTemplate);
             if (vuMark != RelicRecoveryVuMark.UNKNOWN)

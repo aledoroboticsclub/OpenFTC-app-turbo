@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Code2018;
 
+import com.disnodeteam.dogecv.CameraViewDisplay;
+import com.disnodeteam.dogecv.detectors.JewelDetector;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.teamcode.Code2018.DogeCV.ClosableVuforiaLocalizer;
 
 
 /**
@@ -47,12 +50,14 @@ public class Scorpion {
 
 	public static final String TAG = "Vuforia VuMark";
 	OpenGLMatrix lastLocation = null;
-	VuforiaLocalizer vuforia;
+	public ClosableVuforiaLocalizer vuforia;
 	int cameraMonitorViewId;
 	VuforiaLocalizer.Parameters parameters;
 	public VuforiaTrackables relicTrackables;
 	public VuforiaTrackable relicTemplate;
 	private static final int vuforiaTimeoutTime=10000;//in milliseconds
+
+	public JewelDetector jewelDetector = null;
 
 	ElapsedTime timer = new ElapsedTime();
 
@@ -75,13 +80,12 @@ public class Scorpion {
 	private static final int liftPosition1=440;//places over 1 cubes
 	private static final int liftPosition2=2360;//places over 2 cubes
 	private static final int liftPosition3=3000;//places over 3 cubes
-	private static final double liftPower=1;//max speed lift travels at, currently unused
+	private static final double liftPower=1;//max speed lift travels at
 	private static final double liftSpeedMultiplier=80;//modifies the speed of manual control of lift
 
 
 	public void initRobot(HardwareMap spareMap, Telemetry tempTelemetry) {
 		getOpmodeVariables(spareMap, tempTelemetry);
-		initVuforia();
 		initHardware();
 
 		lift1.setPower(liftPower);
@@ -95,8 +99,8 @@ public class Scorpion {
 	}
 
 	public void getOpmodeVariables(HardwareMap spareMap, Telemetry tempTelemetry) {
-		telemetry = tempTelemetry;
 		hardwareMap=spareMap;
+		telemetry = tempTelemetry;
 	}
 	public void initVuforia(){
 		cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -104,11 +108,32 @@ public class Scorpion {
 		parameters.vuforiaLicenseKey = "Ac8Q0nb/////AAAAGZRBQQCid0gNt3ydtz8W8gB8MrlkYn+Gu+jvldH+Igx9SypXvRwUWJw/71iF8xhpjKXBDv1UDD+EsjkvvC1+Zko/hF+lZG/TglT50MCsw6/q2MuSc+AUFDqT9lhEJcyroMMp20VPNwj/fUoUAxr5DV4+VUdwwYW/sCML6iL/x0rWEzUGxJf8qvKSrZcI/4X2fWsryCaprTXecsZCTudHQiElph2GCtMva4843D9sx+a6NB9zhPiyn6aaydEs5T4Ygc5o2nK1p6o8G82++XtlDYPkBuVBajLsO6z0Zvk980xIWmgyKjMNZlLofM7lLJdjt5Sh4a1imlIlsAWbQqPvs35MxJLmmrugrO7WXXveK4TY";
 
 		parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
-		this.vuforia = ClassFactory.createVuforiaLocalizer(parameters);
+		this.vuforia = new ClosableVuforiaLocalizer(parameters);
 
 		relicTrackables = this.vuforia.loadTrackablesFromAsset("RelicVuMark");
 		relicTemplate = relicTrackables.get(0);
 		relicTemplate.setName("relicVuMarkTemplate"); // can help in debugging; otherwise not necessary
+		relicTrackables.activate();
+	}
+	public void deactivateVuforia(){
+		relicTrackables.deactivate();
+		vuforia.close();//ends vuforia
+	}
+	public void initJewelDetector(){
+		jewelDetector = new JewelDetector();
+		jewelDetector.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
+
+		//Jewel Detector Settings
+		jewelDetector.areaWeight = 0.02;
+		jewelDetector.detectionMode = JewelDetector.JewelDetectionMode.MAX_AREA; // PERFECT_AREA
+		//jewelDetector.perfectArea = 6500; <- Needed for PERFECT_AREA
+		jewelDetector.debugContours = true;
+		jewelDetector.maxDiffrence = 15;
+		jewelDetector.ratioWeight = 15;
+		jewelDetector.minArea = 700;
+		jewelDetector.rotateMat=true;
+
+		jewelDetector.enable();
 	}
 	public void initGyro() {
 		gyroParameters = new BNO055IMU.Parameters();
@@ -157,6 +182,10 @@ public class Scorpion {
 	
 	String format(OpenGLMatrix transformationMatrix) {
 		return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+	}
+	public void displayJewelResults(){//assumes dogeCV is turned on
+		telemetry.addData("Jewel Order: ", jewelDetector.getCurrentOrder().toString());
+		telemetry.update();
 	}
 	
 	public void rightIntake (double power) {
@@ -664,6 +693,7 @@ public class Scorpion {
 		final int defaultDistance=0;
 		int driveDistance=0;
 		ElapsedTime check=new ElapsedTime();
+
 		RelicRecoveryVuMark vuMark=RelicRecoveryVuMark.from(relicTemplate);
 		while(vuMark==RelicRecoveryVuMark.UNKNOWN){
 			vuMark = RelicRecoveryVuMark.from(relicTemplate);
@@ -681,6 +711,15 @@ public class Scorpion {
 				break;
 			telemetry.update();
 		}
+		/*while () {
+			vuMark = RelicRecoveryVuMark.from(relicTemplate);
+			if (vuMark != RelicRecoveryVuMark.UNKNOWN)
+				telemetry.addData("VuMark", "%s visible", vuMark);
+			else
+				telemetry.addData("VuMark", "not visible");
+
+			telemetry.update();
+		}*/
 		return defaultDistance;
 	}
 }

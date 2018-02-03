@@ -17,10 +17,22 @@ public class AutoTester extends LinearOpMode {
     @Override
     public void runOpMode() {
         r.initRobot(hardwareMap, telemetry);
+        r.initGyro();
+        r.initVuforia();//starts vuforia
         AutoTransitioner.transitionOnStop(this, "TeleopScorpion");
 
         waitForStart();
 
+        r.waitUntilVuMarkIsFound();
+        r.deactivateVuforia();
+        r.driveForwardTime(.5,500);
+        r.initJewelDetector();//starts dogeCV
+        while(opModeIsActive()){
+            //r.displayJewelResults();
+            telemetry.addData("Jewel Order: ", r.jewelDetector.getCurrentOrder().toString());
+            telemetry.update();
+        }
+        r.jewelDetector.disable();
         /*r.turnAbsolute(90,1);
         r.turnAbsolute(-90,1);*/
     }
