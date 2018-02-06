@@ -10,14 +10,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.RelicRecoveryVuMark;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.teamcode.Code2018.DogeCV.ClosableVuforiaLocalizer;
+
+import java.util.Locale;
 
 
 /**
@@ -38,12 +43,16 @@ public class Scorpion {
 	Servo jewelPusher;
 	Servo relicGrabber;
 	Servo extender;
+	Servo intakeLockLeft;
+	Servo intakeLockRight;
+	public Servo phoneServo;
 
 	//ColorSensor MRColor;
 	BNO055IMU.Parameters gyroParameters;
 	BNO055IMU rev1;
 	BNO055IMU rev2;
-	int zAccumulated;
+	private static final int turningPrecisionRequirement =3;
+	private static final int turnSpeedForEncoderRunToPosition =5;
 
 	Telemetry telemetry;
 	HardwareMap hardwareMap;
@@ -61,15 +70,19 @@ public class Scorpion {
 
 	ElapsedTime timer = new ElapsedTime();
 
-	private static final double initialTrayPosition=.943;
-	private static final double parallelTrayPosition =.673;
-	private static final double placementTrayPosition=0.06;
+	private static final double initialTrayPosition=.89;
+	private static final double parallelTrayPosition =.64;
+	private static final double placementTrayPosition=0.0;
 
-	private static final double jewelPusherDownPosition=.92;
-	private static final double jewelPusherUpPosition=.39;
+	private static final double jewelPusherDownPosition=.67;
+	private static final double jewelPusherUpPosition=.18;
+	private static final double jewelPusherStartPosition=.05;
 
-	private static final double relicGrabberGrabbedPosition=.6;
-	private static final double relicGrabberReleasePosition=.45;
+	private static final double relicGrabberGrabbedPosition=.57;
+	private static final double relicGrabberReleasePosition=.35;
+
+	private static final double phoneUpPosition=.41;
+	private static final double phoneJewelPosition=.65;
 
 	private static final int ticksPerInch=89;//TODO: test this value, this one is from last year
 	private static final int encoderSafeZone=300;/*a motor must be within this many ticks of its
@@ -92,8 +105,9 @@ public class Scorpion {
 		lift2.setPower(liftPower);
 
 		setTrayToIntake();
-		jewelPusher.setPosition(jewelPusherUpPosition);
+		jewelPusher.setPosition(jewelPusherStartPosition);
 		setGrabberToGrabbed();
+		setPhoneToUpPosition();
 
 		//MRColor.enableLed(true);
 	}
@@ -148,6 +162,8 @@ public class Scorpion {
 		rev2 = hardwareMap.get(BNO055IMU.class, "rev2");
 		rev1.initialize(gyroParameters);
 		rev2.initialize(gyroParameters);
+
+
 	}
 	public void initHardware(){
 		frontLeft = hardwareMap.dcMotor.get("front left wheel");
@@ -176,6 +192,9 @@ public class Scorpion {
 		relicGrabber=hardwareMap.servo.get("relicServo");
 		jewelPusher=hardwareMap.servo.get("jewelPusher");
 		extender=hardwareMap.servo.get("extender");
+		intakeLockLeft=hardwareMap.servo.get("intakeLockLeft");
+		intakeLockRight=hardwareMap.servo.get("intakeLockRight");
+		phoneServo=hardwareMap.servo.get("phoneServo");
 
 		//MRColor=hardwareMap.colorSensor.get("Color");
 	}
@@ -186,6 +205,12 @@ public class Scorpion {
 	public void displayJewelResults(){//assumes dogeCV is turned on
 		telemetry.addData("Jewel Order: ", jewelDetector.getCurrentOrder().toString());
 		telemetry.update();
+	}
+	String formatAngle(AngleUnit angleUnit, double angle) {
+		return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+	}
+	String formatDegrees(double degrees){
+		return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
 	}
 	
 	public void rightIntake (double power) {
@@ -249,6 +274,9 @@ public class Scorpion {
 		telemetry.addData("lift position: ", "3");
 		telemetry.addData("ready to place over 3 cubes", "");
 	}
+
+	public void setPhoneToUpPosition(){phoneServo.setPosition(phoneUpPosition);}
+	public void setPhoneToJewelPosition(){phoneServo.setPosition(phoneJewelPosition);}
 
 	public void setMotorEncoderForward(int distance) {
 		frontLeft.setTargetPosition(distance);
@@ -542,35 +570,39 @@ public class Scorpion {
 	//jewel pusher method
 	public void pushJewel(String teamColor){
 		jewelPusher.setPosition(jewelPusherDownPosition);
-		waiter(500);
-		/*if(teamColor.equals("Blue")){
-			if(MRColor.blue()>MRColor.red()){
+		waiter(2000);
+		if(teamColor.equals("Blue")){
+			if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.BLUE_RED)){
 				telemetry.addData("Blue","");
 				turnClockwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
+				waiter(3000);
 				turnCounterwiseEncoder(.25,3);
 			}
-			else{
+			else if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.RED_BLUE)){
 				telemetry.addData("Red","");
 				turnCounterwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
+				waiter(3000);
 				turnClockwiseEncoder(.25,3);
 			}
 		}
 		if(teamColor == "Red"){
-			if(MRColor.red()>MRColor.blue()){
+			if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.RED_BLUE)){
 				telemetry.addData("Red","");
 				turnClockwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
+				waiter(3000);
 				turnCounterwiseEncoder(.25,3);
 			}
-			else{
+			else if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.BLUE_RED)){
 				telemetry.addData("Blue","");
 				turnCounterwiseEncoder(.25,3);
 				jewelPusher.setPosition(jewelPusherUpPosition);
+				waiter(3000);
 				turnClockwiseEncoder(.25,3);
 			}
-		}*/
+		}
 	}
 
 	//driveTime methods
@@ -651,47 +683,53 @@ public class Scorpion {
 		backRight.setPower(0);
 	}
 
-	/*public int getGyroAvgZ(){
-		return (rev1.()+rev2.rawZ())/2;
+	public double getGyroAvgZ1(){
+		Orientation orient1 = rev1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+		double angle1 = Double.parseDouble(formatAngle(orient1.angleUnit, orient1.firstAngle));
+		return angle1;
 	}
-	rev1.*/
+	public double getGyroAvgZ2(){
+		Orientation orient2 = rev2.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+		double angle2 = Double.parseDouble(formatAngle(orient2.angleUnit, orient2.firstAngle));
+		return angle2;
+	}
 
 	//TODO: must change so that it can work in SET_TO_POSTITION mode, maybe one for both modes
-	/*public void turnAbsolute(int target, double power) {
-		setDriveMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
-		zAccumulated = getGyroAvgZ();  //Set variables to gyro readings
+	/*public void turnAbsoluteUsingEncoder(int target, double power) {//for RUN_USING_ENCODER mode
+		double zAccumulated = getGyroAvgZ();  //Set variables to gyro readings
 
-		while (Math.abs(zAccumulated - target)  >0 )//Continue while the robot direction is further than three degrees from the target
-		{
-			//telemetry.addData("rev1 heading: ",rev1.getHeading());
-			//telemetry.addData("rev2 heading: ",rev2.getHeading());
-			telemetry.addData("integratedZValue: ",getGyroAvgZ());
-			telemetry.update();
+		while (Math.abs(zAccumulated - target)  > turningPrecisionRequirement){//while off target
 			if (zAccumulated > target)//if gyro is positive, turn counterwise
-			{
-				frontLeft.setPower(-power);
-				frontRight.setPower(power);
-				backLeft.setPower(-power);
-				backRight.setPower(power);
-			}
-
+				setToCounterwise(power);
 			if (zAccumulated < target)//if gyro is negative, turn clockwise
-			{
-				frontLeft.setPower(power);
-				frontRight.setPower(-power);
-				backLeft.setPower(power);
-				backRight.setPower(-power);
-			}
-			zAccumulated = getGyroAvgZ();  //Set variables to gyro readings
-			telemetry.addData("accu", String.format("%03d", zAccumulated));
-			telemetry.update();
+				setToClockwise(power);
 		}
 		setToStill();
 	}*/
 
-	public int waitUntilVuMarkIsFound() { //returns a distance for the robot to travel
-		final int defaultDistance=0;
-		int driveDistance=0;
+	/*public void turnAbsoluteRunToPosition(int target, double power) {//for RUN_TO_POSITION mode
+		double zAccumulated = getGyroAvgZ();  //Set variables to gyro readings
+
+		while (Math.abs(zAccumulated - target)  > turningPrecisionRequirement){//Continue while the robot direction is further than three degrees from the target
+			if (zAccumulated > target) {//if gyro is positive, turn counterwise
+				frontLeft.setTargetPosition(frontLeft.getCurrentPosition()-turnSpeedForEncoderRunToPosition);
+				frontRight.setTargetPosition(frontRight.getCurrentPosition()+turnSpeedForEncoderRunToPosition);
+				backLeft.setTargetPosition(backLeft.getCurrentPosition()-turnSpeedForEncoderRunToPosition);
+				backRight.setTargetPosition(backRight.getCurrentPosition()+turnSpeedForEncoderRunToPosition);
+			}
+			if (zAccumulated < target){//if gyro is negative, turn clockwise
+				frontLeft.setTargetPosition(frontLeft.getCurrentPosition()+turnSpeedForEncoderRunToPosition);
+				frontRight.setTargetPosition(frontRight.getCurrentPosition()-turnSpeedForEncoderRunToPosition);
+				backLeft.setTargetPosition(backLeft.getCurrentPosition()+turnSpeedForEncoderRunToPosition);
+				backRight.setTargetPosition(backRight.getCurrentPosition()-turnSpeedForEncoderRunToPosition);
+			}
+		setToStill();
+	}*/
+
+	public RelicRecoveryVuMark waitUntilVuMarkIsFound() { //returns a distance for the robot to travel
+		RelicRecoveryVuMark returner=RelicRecoveryVuMark.UNKNOWN;
 		ElapsedTime check=new ElapsedTime();
 
 		RelicRecoveryVuMark vuMark=RelicRecoveryVuMark.from(relicTemplate);
@@ -699,11 +737,7 @@ public class Scorpion {
 			vuMark = RelicRecoveryVuMark.from(relicTemplate);
 			if (vuMark != RelicRecoveryVuMark.UNKNOWN){
 				telemetry.addData("VuMark", "%s visible", vuMark);
-				if(vuMark.equals(RelicRecoveryVuMark.CENTER)) //If left go the default distance
-					driveDistance=8;
-				if(vuMark.equals(RelicRecoveryVuMark.RIGHT))
-					driveDistance=15;
-				return driveDistance;
+				return vuMark;
 			}
 			else
 				telemetry.addData("VuMark", "not visible");
@@ -711,15 +745,6 @@ public class Scorpion {
 				break;
 			telemetry.update();
 		}
-		/*while () {
-			vuMark = RelicRecoveryVuMark.from(relicTemplate);
-			if (vuMark != RelicRecoveryVuMark.UNKNOWN)
-				telemetry.addData("VuMark", "%s visible", vuMark);
-			else
-				telemetry.addData("VuMark", "not visible");
-
-			telemetry.update();
-		}*/
-		return defaultDistance;
+		return RelicRecoveryVuMark.UNKNOWN;
 	}
 }

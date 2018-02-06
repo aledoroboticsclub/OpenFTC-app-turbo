@@ -37,6 +37,9 @@ public class ServoTester extends OpMode
 
 	Servo relicServo;
 	double relicPosition=.69;
+	
+	Servo phoneServo;
+	double phonePosition=.91;
 
 	//ColorSensor MRColor;
 
@@ -48,6 +51,7 @@ public class ServoTester extends OpMode
 		trayServo=hardwareMap.servo.get("trayServo");
 		jewelPusher=hardwareMap.servo.get("jewelPusher");
 		relicServo=hardwareMap.servo.get("relicServo");
+		phoneServo=hardwareMap.servo.get("phoneServo");
 		lift1=hardwareMap.dcMotor.get("lift1");
 		lift2=hardwareMap.dcMotor.get("lift2");
 		lift1.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -98,5 +102,12 @@ public class ServoTester extends OpMode
 		relicPosition=relicPosition<-1?-1:relicPosition;
 		relicServo.setPosition(relicPosition);
 		telemetry.addData("relic Servo Position", relicPosition);
+
+		phonePosition+=gamepad1.dpad_left?.01:0;
+		phonePosition-=gamepad1.dpad_right?.01:0;
+		phonePosition=phonePosition>1?1:phonePosition;
+		phonePosition=phonePosition<-1?-1:phonePosition;
+		phoneServo.setPosition(phonePosition);
+		telemetry.addData("phone Servo Position", phonePosition);
 	}
 }

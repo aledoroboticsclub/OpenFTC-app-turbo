@@ -19,6 +19,7 @@ public class TeleopScorpion extends OpMode
 	public void init() {
 		telemetry.addLine("init begun");
 		r.initRobot(hardwareMap,telemetry);
+		r.initGyro();
 		telemetry.addLine("init Complete");
 
 		telemetry.update();
@@ -38,7 +39,7 @@ public class TeleopScorpion extends OpMode
 		aWasPressed=gamepad1.a;
 		//first we must translate the rectangular values of the joystick into polar coordinates
 		double y=-1*gamepad1.left_stick_y;
-		double x=gamepad1.left_stick_x;
+		double x=-1*gamepad1.left_stick_x;
 		double angle=0;
 		if(y>0 && x>0)//quadrant 1
 			angle=Math.atan(y/x);
@@ -119,7 +120,6 @@ public class TeleopScorpion extends OpMode
 			r.setGrabberToGrabbed();
 		else if (gamepad2.right_stick_x>.75)
 			r.setGrabberToRelease();
-		telemetry.addData("gamepad2.right_stick_x",gamepad2.right_stick_x);
 
 		//extender
 		if(gamepad2.right_stick_y>.25)
@@ -129,6 +129,8 @@ public class TeleopScorpion extends OpMode
 		else
 			r.extenderStill();
 		telemetry.addData("Runtime: ", runtime.seconds());
+		telemetry.addData("RevHub1 Angle", r.getGyroAvgZ1());
+		telemetry.addData("RevHub2 Angle", r.getGyroAvgZ2());
 		telemetry.update();
 	}
 }

@@ -22,7 +22,6 @@ public class AutonomousRed1 extends LinearOpMode {
         r.pushJewel("Red");
         r.driveBackwardEncoder(1,12);
         r.turnCounterwiseEncoder(1,12);
-      //  a = r.decodePictograph();
         r.driveBackwardEncoder(1,18 + a);
         r.turnCounterwiseEncoder(1,12);
         r.driveForwardEncoder(1,12);

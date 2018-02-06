@@ -18,22 +18,35 @@ public class AutoTester extends LinearOpMode {
     public void runOpMode() {
         r.initRobot(hardwareMap, telemetry);
         r.initGyro();
-        r.initVuforia();//starts vuforia
-        AutoTransitioner.transitionOnStop(this, "TeleopScorpion");
+
+        /*//To test gyro
+        while(opModeIsActive()){
+            telemetry.addData("RevHub1 Angle", r.getGyroAvgZ());
+        }*/
+
+
+
+
+
+
+
+
+
+
+
+        //To test phone position for DogeCV
+        //AutoTransitioner.transitionOnStop(this, "TeleopScorpion");
+
+        r.initJewelDetector();//starts dogeCV
+        r.waiter(1000);
+        r.phoneServo.setPosition(.65);//need to test
 
         waitForStart();
 
-        r.waitUntilVuMarkIsFound();
-        r.deactivateVuforia();
-        r.driveForwardTime(.5,500);
-        r.initJewelDetector();//starts dogeCV
         while(opModeIsActive()){
-            //r.displayJewelResults();
             telemetry.addData("Jewel Order: ", r.jewelDetector.getCurrentOrder().toString());
             telemetry.update();
         }
         r.jewelDetector.disable();
-        /*r.turnAbsolute(90,1);
-        r.turnAbsolute(-90,1);*/
     }
 }
