@@ -74,18 +74,18 @@ public class Scorpion {
 	private static final double parallelTrayPosition =.64;
 	private static final double placementTrayPosition=0.0;
 
-	private static final double jewelPusherDownPosition=.67;
-	private static final double jewelPusherUpPosition=.18;
-	private static final double jewelPusherStartPosition=.05;
+	private static final double jewelPusherDownPosition=.7;
+	private static final double jewelPusherUpPosition=.23;
+	private static final double jewelPusherStartPosition=.15;
 
 	private static final double relicGrabberGrabbedPosition=.57;
 	private static final double relicGrabberReleasePosition=.35;
 
 	private static final double phoneUpPosition=.41;
-	private static final double phoneJewelPosition=.65;
+	private static final double phoneJewelPosition=.62;
 
 	private static final int ticksPerInch=89;//TODO: test this value, this one is from last year
-	private static final int encoderSafeZone=300;/*a motor must be within this many ticks of its
+	private static final int encoderSafeZone=50;/*a motor must be within this many ticks of its
 	target to be considered "on target"*/
 
 	//in motor ticks
@@ -174,7 +174,7 @@ public class Scorpion {
 		backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 		setDriveMotorZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 		setDriveMotorMode(DcMotor.RunMode.RUN_USING_ENCODER);
-		
+
 		lift1=hardwareMap.dcMotor.get("lift1");
 		lift2=hardwareMap.dcMotor.get("lift2");
 		lift2.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -187,7 +187,7 @@ public class Scorpion {
 		inputML.setDirection(DcMotorSimple.Direction.REVERSE);
 		inputML.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 		inputMR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-		
+
 		trayServo=hardwareMap.servo.get("trayServo");
 		relicGrabber=hardwareMap.servo.get("relicServo");
 		jewelPusher=hardwareMap.servo.get("jewelPusher");
@@ -198,7 +198,7 @@ public class Scorpion {
 
 		//MRColor=hardwareMap.colorSensor.get("Color");
 	}
-	
+
 	String format(OpenGLMatrix transformationMatrix) {
 		return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
 	}
@@ -212,7 +212,7 @@ public class Scorpion {
 	String formatDegrees(double degrees){
 		return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
 	}
-	
+
 	public void rightIntake (double power) {
 		inputMR.setPower(power*.4);
 	}
@@ -522,7 +522,7 @@ public class Scorpion {
 		backLeft.setPower(power);
 		backRight.setPower(power);
 	}//for use with driveEncoder methods
-	
+
 	public void setLiftMotorMode(DcMotor.RunMode mode){
 		switch(mode) {
 			case RUN_USING_ENCODER:
@@ -567,42 +567,44 @@ public class Scorpion {
 		while(timer.milliseconds()<time){}
 	}
 
-	//jewel pusher method
+	//jewel pusher methods
 	public void pushJewel(String teamColor){
-		jewelPusher.setPosition(jewelPusherDownPosition);
-		waiter(2000);
+		waiter(1000);
 		if(teamColor.equals("Blue")){
 			if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.BLUE_RED)){
-				telemetry.addData("Blue","");
-				turnClockwiseEncoder(.25,3);
+				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
+				turnClockwiseEncoder(.25,8);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(3000);
-				turnCounterwiseEncoder(.25,3);
+				waiter(1000);
+				turnCounterwiseEncoder(.25,8);
 			}
 			else if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.RED_BLUE)){
-				telemetry.addData("Red","");
-				turnCounterwiseEncoder(.25,3);
+				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
+				turnCounterwiseEncoder(.25,8);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(3000);
-				turnClockwiseEncoder(.25,3);
+				waiter(1000);
+				turnClockwiseEncoder(.25,4);
 			}
 		}
-		if(teamColor == "Red"){
+		if(teamColor.equals("Red")){
 			if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.RED_BLUE)){
-				telemetry.addData("Red","");
-				turnClockwiseEncoder(.25,3);
+				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
+				turnClockwiseEncoder(.25,8);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(3000);
-				turnCounterwiseEncoder(.25,3);
+				waiter(1000);
+				turnCounterwiseEncoder(.25,8);
 			}
 			else if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.BLUE_RED)){
-				telemetry.addData("Blue","");
-				turnCounterwiseEncoder(.25,3);
+				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
+				turnCounterwiseEncoder(.25,8);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(3000);
-				turnClockwiseEncoder(.25,3);
+				waiter(1000);
+				turnClockwiseEncoder(.25,4);
 			}
 		}
+	}
+	public void setJewelPusherToDown (){
+		jewelPusher.setPosition(jewelPusherDownPosition);
 	}
 
 	//driveTime methods

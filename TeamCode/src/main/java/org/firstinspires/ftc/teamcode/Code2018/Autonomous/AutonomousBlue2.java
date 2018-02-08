@@ -17,19 +17,19 @@ public class AutonomousBlue2 extends LinearOpMode {
     public void runOpMode() {
         AutoTransitioner.transitionOnStop(this, "TeleopScorpion");
         r.initRobot(hardwareMap, telemetry);
-
-
         r.initJewelDetector();
+        r.waiter(2500);
 
         waitForStart();
 
-        //r.relicTrackables.activate();
-
-        r.driveLeftEncoder(.05,1);
+        r.setJewelPusherToDown();
+        r.driveRightEncoder(.1,3);
+        r.waiter(1000);
         r.setPhoneToJewelPosition();
         r.pushJewel("Blue");
         r.setPhoneToUpPosition();
-        //r.driveRightEncoder(.25,40);
+        r.jewelDetector.disable();
+        //r.driveLeftEncoder(.25,40);
         //r.initVuforia();
         //RelicRecoveryVuMark pictograph = r.waitUntilVuMarkIsFound();
         //telemetry.addData("VuMark: ",pictograph);
