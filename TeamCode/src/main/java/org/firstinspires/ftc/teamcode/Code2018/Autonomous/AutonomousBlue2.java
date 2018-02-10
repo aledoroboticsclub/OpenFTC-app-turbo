@@ -12,6 +12,7 @@ import org.firstinspires.ftc.teamcode.Code2018.Scorpion;
 
 public class AutonomousBlue2 extends LinearOpMode {
     Scorpion r = new Scorpion();
+    RelicRecoveryVuMark pictograph;
     int pictographDistance = 0;
     @Override
     public void runOpMode() {
@@ -27,21 +28,54 @@ public class AutonomousBlue2 extends LinearOpMode {
         r.waiter(1000);
         r.setPhoneToJewelPosition();
         r.pushJewel("Blue");
+        r.setJewelPusherToUp();
         r.setPhoneToUpPosition();
+        r.waiter(1000);
+
         r.jewelDetector.disable();
-        //r.driveLeftEncoder(.25,40);
-        //r.initVuforia();
-        //RelicRecoveryVuMark pictograph = r.waitUntilVuMarkIsFound();
-        //telemetry.addData("VuMark: ",pictograph);
-//        r.driveLeftEncoder(.25,48);
+        telemetry.addData("jeweldetector", "off");
+        telemetry.update();
+
+        r.driveLeftEncoder(.5,24);
+        telemetry.addData("driveleft", "now");
+        telemetry.update();
+
+        telemetry.addData("going forward", "now");
+        telemetry.update();
+        r.driveBackwardEncoder(.5,-34);
+        r.turnClockwiseEncoder(.25,24);
+        r.waiter(500);
+//        r.driveBackwardEncoder(.25,-20);
+//        r.waiter(500);
+//        r.leftIntake(1);
+//        r.rightIntake(1);
+//        r.waiter(2000);
+//        r.rightIntake(0);
+//        r.leftIntake(0);
+//        r.driveBackwardEncoder(.5,24);
+//        r.driveBackwardEncoder(.1,12);
+//        r.turnCounterwiseEncoder(.25,30);
+//        r.driveRightEncoder(.5,30);
+//        r.turnClockwiseEncoder(.25,24);
+//        r.driveBackwardEncoder(.1,-8);
+
+//        r.initVuforia();
+//        r.waiter(2500);
+//        pictograph = r.waitUntilVuMarkIsFound();
+//        telemetry.addData("VuMark: ",pictograph);
+//        //defaults to left
 //        if(pictograph.equals(RelicRecoveryVuMark.CENTER))
 //            pictographDistance = 7;
 //        if(pictograph.equals(RelicRecoveryVuMark.RIGHT))
 //            pictographDistance = 14;
-//        r.driveBackwardEncoder(.5,pictographDistance);
-//        r.turnClockwiseEncoder(.25,21);
+//        r.deactivateVuforia();
+//        r.setPhoneToUpPosition();
+        //r.driveForwardEncoder(.25, 12);
+        //r.turnClockwiseEncoder(.25,24);
+        //r.driveBackwardEncoder(1,30);
+
 //        r.setTrayToPlace();
-//        r.driveBackwardEncoder(.25,3);
+//        r.driveBackwardEncoder(.25,-3);
 //        r.setTrayToIntake();
     }
 }

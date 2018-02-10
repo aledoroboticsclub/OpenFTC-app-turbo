@@ -40,6 +40,11 @@ public class ServoTester extends OpMode
 	
 	Servo phoneServo;
 	double phonePosition=.91;
+	
+	Servo intakeLockRight;
+	Servo intakeLockLeft;
+	double intakeLockRPosition;
+	double intakeLockLPosition;
 
 	//ColorSensor MRColor;
 
@@ -102,6 +107,20 @@ public class ServoTester extends OpMode
 		relicPosition=relicPosition<-1?-1:relicPosition;
 		relicServo.setPosition(relicPosition);
 		telemetry.addData("relic Servo Position", relicPosition);
+
+		phonePosition+=gamepad1.dpad_left?.01:0;
+		phonePosition-=gamepad1.dpad_right?.01:0;
+		phonePosition=phonePosition>1?1:phonePosition;
+		phonePosition=phonePosition<-1?-1:phonePosition;
+		phoneServo.setPosition(phonePosition);
+		telemetry.addData("phone Servo Position", phonePosition);
+
+		intakeLockRPosition+=gamepad1.dpad_down?.01:0;
+		intakeLockRPosition-=gamepad1.dpad_up?.01:0;
+		intakeLockRPosition=intakeLockRPosition>1?1:intakeLockRPosition;
+		intakeLockRPosition=intakeLockRPosition<-1?-1:intakeLockRPosition;
+		intakeLockRight.setPosition(intakeLockRPosition);
+		telemetry.addData("intakeLockR Servo Position", intakeLockRPosition);
 
 		phonePosition+=gamepad1.dpad_left?.01:0;
 		phonePosition-=gamepad1.dpad_right?.01:0;

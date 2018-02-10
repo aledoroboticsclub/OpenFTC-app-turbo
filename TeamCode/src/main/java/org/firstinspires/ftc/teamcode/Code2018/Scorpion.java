@@ -573,38 +573,45 @@ public class Scorpion {
 		if(teamColor.equals("Blue")){
 			if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.BLUE_RED)){
 				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
-				turnClockwiseEncoder(.25,8);
+				telemetry.update();
+				turnClockwiseEncoder(.1,5);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(1000);
-				turnCounterwiseEncoder(.25,8);
+				waiter(2000);
+				turnCounterwiseEncoder(.1,1);
 			}
 			else if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.RED_BLUE)){
 				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
-				turnCounterwiseEncoder(.25,8);
+				telemetry.update();
+				turnCounterwiseEncoder(.1,5);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(1000);
-				turnClockwiseEncoder(.25,4);
+				waiter(2000);
+				turnClockwiseEncoder(.1,1);
 			}
 		}
 		if(teamColor.equals("Red")){
 			if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.RED_BLUE)){
 				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
-				turnClockwiseEncoder(.25,8);
+				telemetry.update();
+				turnClockwiseEncoder(.1,5);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(1000);
-				turnCounterwiseEncoder(.25,8);
+				waiter(2000);
+				turnCounterwiseEncoder(.1,1);
 			}
 			else if(jewelDetector.getCurrentOrder().equals(JewelDetector.JewelOrder.BLUE_RED)){
 				telemetry.addData("Sequence",jewelDetector.getCurrentOrder());
-				turnCounterwiseEncoder(.25,8);
+				telemetry.update();
+				turnCounterwiseEncoder(.1,5);
 				jewelPusher.setPosition(jewelPusherUpPosition);
-				waiter(1000);
-				turnClockwiseEncoder(.25,4);
+				waiter(2000);
+				turnClockwiseEncoder(.1,1);
 			}
 		}
 	}
 	public void setJewelPusherToDown (){
 		jewelPusher.setPosition(jewelPusherDownPosition);
+	}
+	public void setJewelPusherToUp (){
+		jewelPusher.setPosition(jewelPusherUpPosition);
 	}
 
 	//driveTime methods

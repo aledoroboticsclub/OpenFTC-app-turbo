@@ -31,7 +31,7 @@ public class TeleopScorpion extends OpMode
 		runtime.reset();
 	}
 
-	boolean inReverse=false;//reverse button is a
+	boolean inReverse=true;//reverse button is a
 	boolean aWasPressed=false;
 	public void loop() {
 		if(gamepad1.a && !aWasPressed)
@@ -89,13 +89,13 @@ public class TeleopScorpion extends OpMode
 		if(gamepad2.right_trigger>.1)
 			r.rightIntake(gamepad2.right_trigger);
 		else if(gamepad2.right_bumper)
-			r.rightIntake(gamepad1.b?-1:-.5);
+			r.rightIntake(-1);
 		else
 			r.rightIntake(0);
 		if (gamepad2.left_trigger>.1)
 			r.leftIntake(gamepad2.left_trigger);
 		else if(gamepad2.left_bumper)
-			r.leftIntake(gamepad1.b?-1:-.5);
+			r.leftIntake(-1);
 		else
 			r.leftIntake(0);
 
